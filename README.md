@@ -19,7 +19,7 @@ Eric Wei | ericjwei@uw.edu
 
 ## Technology and Partners
 
-![](https://www.shakealert.org/wp-content/uploads/2012/04/USGS_Logo.png)
-![](https://www.shakealert.org/wp-content/uploads/2012/04/UW-logo.jpg)
-![](https://www.shakealert.org/wp-content/uploads/2016logosno.png)
-![](https://freeicons.io/laravel/public/uploads/icons/png/18181230061536126577-128.png)
+![a](https://www.shakealert.org/wp-content/uploads/2012/04/USGS_Logo.png)
+![b](https://www.shakealert.org/wp-content/uploads/2012/04/UW-logo.jpg)
+![c](https://www.shakealert.org/wp-content/uploads/2016logosno.png)
+![d](https://freeicons.io/laravel/public/uploads/icons/png/18181230061536126577-128.png)
