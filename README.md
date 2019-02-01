@@ -16,4 +16,4 @@ Eric Wei | ericjwei@uw.edu
 
 [Sirrus7](https://www.sirrus7.com/)
 
-[](https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/2000px-Amazon_Web_Services_Logo.svg.png)
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/2000px-Amazon_Web_Services_Logo.svg.png)
