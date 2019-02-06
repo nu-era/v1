@@ -22,4 +22,4 @@ Eric Wei | ericjwei@uw.edu
 ![](https://landsat.gsfc.nasa.gov/wp-content/uploads/2013/09/USGS_logo_green.png)
 ![](https://pbs.twimg.com/profile_images/692813728446722048/7kg5YJ6F_400x400.png)
 ![](https://freeicons.io/laravel/public/uploads/icons/png/18181230061536126577-128.png)
-![](https://rallen.berkeley.edu/img/ShakeAlertlogo.png)
+\t![](https://rallen.berkeley.edu/img/ShakeAlertlogo.png)
