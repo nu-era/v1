@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"gopkg.in/mgo.v2"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
 )
 
 const headerUser = "X-User"
@@ -35,6 +35,13 @@ func main() {
 		log.Fatal("please set TLSKEY and TLSCERT")
 	}
 
+	mongo := os.Getenv("MONGOADDR")
+	sess, err := mgo.Dial(mongo)
+	if err != nil {
+		fmt.Printf("error dialing mongo: %v\n", err)
+	} else {
+		fmt.Printf("connected successfully!")
+	}
 	// // construct rediserver
 	// redisAddr := reqEnv("REDISADDR")
 	// rClient := redis.NewClient(&redis.Options{
