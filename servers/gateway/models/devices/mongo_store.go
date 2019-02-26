@@ -62,12 +62,29 @@ func (ms *MongoStore) Insert(dev *Device) (*Device, error) {
 //Update applies DeviceUpdates to the given device ID
 //and returns the newly-updated device
 func (ms *MongoStore) Update(id bson.ObjectId, updates *Updates) (*Device, error) {
+	coll := ms.ses.DB("store").C("Devices")
+	//send an update document with a `$set` property set to the updates map
+	if err := coll.UpdateId(id, bson.M{"$set": updates}); err != nil {
+		return nil, err
+	}
+	dev, err := ms.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
 
+	if err = dev.ApplyUpdates(updates); err != nil {
+		return nil, err
+	}
+	return dev, nil
 }
 
 //Delete deletes the device with the given ID
 func (ms *MongoStore) Delete(id bson.ObjectId) error {
-
+	coll := ms.ses.DB("store").C("Devices")
+	if err := coll.RemoveId(id); err != nil {
+		return err
+	}
+	return nil
 }
 
 //InsertMessage inserts a message into the database for the Device with given id
@@ -76,6 +93,6 @@ func (ms *MongoStore) InsertMessage(id bson.ObjectId) error {
 }
 
 //GetMessages returns the messages that have been sent to the Device with given id
-func (msg *MongoStore) GetMessages(id bson.ObjectId) (*map[string]interface{}, error) {
+func (ms *MongoStore) GetMessages(id bson.ObjectId) (*map[string]interface{}, error) {
 
 }
