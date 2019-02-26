@@ -37,7 +37,7 @@ func (ms *MongoStore) GetByName(name string) (*Device, error) {
 }
 
 func (ms *MongoStore) get(col string, val string) (*Device, error) {
-	coll := ms.ses.DB("store").C("Devices")
+	coll := ms.ses.DB("store").C("devices")
 	dev := Device{}
 	if col == "val" {
 		coll.Find(bson.M{col: bson.ObjectId(val)}).One(&dev)
@@ -49,7 +49,7 @@ func (ms *MongoStore) get(col string, val string) (*Device, error) {
 //Insert inserts the device into the database, and returns
 //the newly-inserted Device, complete with the DBMS-assigned ID
 func (ms *MongoStore) Insert(dev *Device) (*Device, error) {
-	coll := ms.ses.DB("store").C("Devices")
+	coll := ms.ses.DB("store").C("devices")
 	//insert struct into collection
 	if err := coll.Insert(dev); err != nil {
 		return nil, fmt.Errorf("error inserting document: %v\n", err)
@@ -60,9 +60,9 @@ func (ms *MongoStore) Insert(dev *Device) (*Device, error) {
 }
 
 //Update applies DeviceUpdates to the given device ID
-//and returns the newly-updated device
+//and returns the newly-updated device. Only applies valid updates to Device
 func (ms *MongoStore) Update(id bson.ObjectId, updates *Updates) (*Device, error) {
-	coll := ms.ses.DB("store").C("Devices")
+	coll := ms.ses.DB("store").C("devices")
 	//send an update document with a `$set` property set to the updates map
 	if err := coll.UpdateId(id, bson.M{"$set": updates}); err != nil {
 		return nil, err
@@ -80,19 +80,21 @@ func (ms *MongoStore) Update(id bson.ObjectId, updates *Updates) (*Device, error
 
 //Delete deletes the device with the given ID
 func (ms *MongoStore) Delete(id bson.ObjectId) error {
-	coll := ms.ses.DB("store").C("Devices")
+	coll := ms.ses.DB("store").C("devices")
 	if err := coll.RemoveId(id); err != nil {
 		return err
 	}
+
 	return nil
 }
 
 //InsertMessage inserts a message into the database for the Device with given id
-func (ms *MongoStore) InsertMessage(id bson.ObjectId) error {
-
-}
-
-//GetMessages returns the messages that have been sent to the Device with given id
-func (ms *MongoStore) GetMessages(id bson.ObjectId) (*map[string]interface{}, error) {
-
+func (ms *MongoStore) InsertMessage(id bson.ObjectId, msg *Message) error {
+	coll := ms.ses.DB("store").C("devices")
+	dev := bson.M{"_id": id}
+	push := bson.M{"$push": bson.M{"messages": msg}}
+	if err := coll.Update(dev, push); err != nil {
+		return err
+	}
+	return nil
 }

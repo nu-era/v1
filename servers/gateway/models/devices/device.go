@@ -26,6 +26,16 @@ type Device struct {
 	Messages map[string]interface{}
 }
 
+// Message represents the message that the client will receive and send
+// back. Contains important information for alert as well as a 'receipt'
+// to confirm delivery
+type Message struct {
+	ID      string `json:"id"`
+	Message string `json:"message"`
+	Date    string `json:"date"`
+	Status  bool   `json:"status"`
+}
+
 //Credentials represents device authorization credentials
 // COMMENT: Do we need this if we want persistent connections?
 //// Maybe just a password that we can reference in a lookup table
