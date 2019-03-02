@@ -23,22 +23,11 @@ type Device struct {
 	PassHash []byte        `json:"-"`
 	Email    string        `json:"-"`
 	Status   string        `json:"status"`
-	Messages map[string]interface{}
-}
-
-// Message represents the message that the client will receive and send
-// back. Contains important information for alert as well as a 'receipt'
-// to confirm delivery
-type Message struct {
-	ID      string `json:"id"`
-	Message string `json:"message"`
-	Date    string `json:"date"`
-	Status  bool   `json:"status"`
 }
 
 //Credentials represents device authorization credentials
 // COMMENT: Do we need this if we want persistent connections?
-//// Maybe just a password that we can reference in a lookup table
+//// Maybe just a password that we can reference in a lookup table via hash
 //// for authorized users?
 type Credentials struct {
 	Email    string `json:"email"`
@@ -98,13 +87,12 @@ func (nu *NewDevice) ToDevice() (*Device, error) {
 	}
 
 	dev := &Device{ // make new device
-		ID:       bson.NewObjectId(),
-		Email:    nu.Email,
-		Name:     nu.Name,
-		Lat:      nu.Lat,
-		Long:     nu.Long,
-		Status:   "up",
-		Messages: map[string]interface{}{},
+		ID:     bson.NewObjectId(),
+		Email:  nu.Email,
+		Name:   nu.Name,
+		Lat:    nu.Lat,
+		Long:   nu.Long,
+		Status: "up",
 	}
 	// hash and set passHash field of device
 	if err := dev.SetPassword(nu.Password); err != nil {
