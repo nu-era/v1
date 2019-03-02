@@ -12,7 +12,7 @@ type MongoStore struct {
 	ses *mgo.Session
 }
 
-func NewMySqlStore(ses *mgo.Session) *MongoStore {
+func NewMongoStore(ses *mgo.Session) *MongoStore {
 	if ses == nil {
 		return nil
 	}
