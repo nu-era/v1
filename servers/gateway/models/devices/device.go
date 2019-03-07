@@ -73,7 +73,7 @@ func (nu *NewDevice) Validate() error {
 		return fmt.Errorf("Email must be provided, got %s", nu.Email)
 	}
 	if nu.Lat == 0 || nu.Long == 0 {
-		return fmt.Errorf("Location must be provided, got lat:%d, long:%d", nu.Lat, nu.Long)
+		return fmt.Errorf("Location must be provided, got lat:%b, long:%b", nu.Lat, nu.Long)
 	}
 
 	return nil

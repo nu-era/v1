@@ -1,10 +1,14 @@
 package devices
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"reflect"
 )
+
+var noDeviceFound = errors.New("Device not found")
 
 // insert methods below
 
@@ -39,10 +43,16 @@ func (ms *MongoStore) GetByName(name string) (*Device, error) {
 func (ms *MongoStore) get(col string, val string) (*Device, error) {
 	coll := ms.ses.DB("store").C("devices")
 	dev := Device{}
-	if col == "val" {
+	if col == "_id" {
 		coll.Find(bson.M{col: bson.ObjectId(val)}).One(&dev)
+	} else {
+		coll.Find(bson.M{col: val}).One(&dev)
 	}
-	coll.Find(bson.M{col: val}).One(&dev)
+
+	if reflect.DeepEqual(Device{}, dev) {
+		return nil, noDeviceFound
+	}
+
 	return &dev, nil
 }
 
