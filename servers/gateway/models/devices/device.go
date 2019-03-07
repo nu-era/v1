@@ -22,6 +22,7 @@ type Device struct {
 	Long     float64       `json:"longitude"`
 	PassHash []byte        `json:"-"`
 	Email    string        `json:"-"`
+	Phone    string        `json:"-"`
 	Status   string        `json:"status"`
 }
 
@@ -41,6 +42,7 @@ type NewDevice struct {
 	Lat          float64 `json:"latitude"`
 	Long         float64 `json:"longitude"`
 	Email        string  `json:"email"`
+	Phone        string  `json:"phone"`
 	Password     string  `json:"password"`
 	PasswordConf string  `json:"passwordConf"`
 }
@@ -51,6 +53,7 @@ type Updates struct {
 	Lat    float64 `json:"latitude"`
 	Long   float64 `json: "longitude"`
 	Email  string  `json:"email"`
+	Phone  string  `json:"phone"`
 	Status string  `json:"status"`
 }
 
@@ -144,6 +147,9 @@ func (d *Device) ApplyUpdates(updates *Updates) error {
 	}
 	if updates.Status != "" && (updates.Status == "up" || updates.Status == "down") {
 		d.Status = updates.Status
+	}
+	if len(updates.Phone) > 10 && len(updates.Phone) < 12 {
+		d.Phone = updates.Phone
 	}
 	return nil
 }
