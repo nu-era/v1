@@ -13,7 +13,7 @@ type MongoStore struct {
 	ses *mgo.Session
 }
 
-func NewMySqlStore(ses *mgo.Session) *MongoStore {
+func NewMongoStore(ses *mgo.Session) *MongoStore {
 	if ses == nil {
 		return nil
 	}
@@ -89,13 +89,14 @@ func (ms *MongoStore) Delete(id bson.ObjectId) error {
 	return nil
 }
 
-//InsertMessage inserts a message into the database for the Device with given id
-func (ms *MongoStore) InsertMessage(id bson.ObjectId, msg *Message) error {
-	coll := ms.ses.DB("store").C("devices")
-	dev := bson.M{"_id": id}
-	push := bson.M{"$push": bson.M{"messages": msg}}
-	if err := coll.Update(dev, push); err != nil {
-		return err
-	}
-	return nil
-}
+// *********** SWITCHED TO MYSQL DB **************
+// //InsertMessage inserts a message into the database for the Device with given id
+// func (ms *MongoStore) InsertMessage(id bson.ObjectId, msg *Message) error {
+// 	coll := ms.ses.DB("store").C("devices")
+// 	dev := bson.M{"_id": id}
+// 	push := bson.M{"$push": bson.M{"messages": msg}}
+// 	if err := coll.Update(dev, push); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
