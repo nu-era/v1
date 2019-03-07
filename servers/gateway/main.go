@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"github.com/New-Era/servers/gateway/handlers"
+	"github.com/New-Era/servers/gateway/models/devices"
+	mgo "gopkg.in/mgo.v2"
 )
 
 // main entry point for the server
@@ -31,15 +33,15 @@ func main() {
 		mongoAddr = "localhost"
 	}
 	// Dialing MongoDB server
-	// mongoSess, err := mgo.Dial(mongoAddr)
-	// if err != nil {
-	// 	log.Fatalf("error dialing mongo: %v", err)
-	// }
+	mongoSess, err := mgo.Dial(mongoAddr)
+	if err != nil {
+		log.Fatalf("error dialing mongo: %v", err)
+	}
 
 	// TODO: construct a new MongoStore, provide mongoSess as well as a
 	// database and collection name to use (device maybe?)
-	//mongoStore := tasks.NewMongoStore(mongoSess, "devices", "devices")
-	//handlerCtx := handlers.NewHandlerContext(mongoStore)
+	mongoStore := devices.NewMongoStore(mongoSess)
+	handlerCtx := handlers.NewHandlerContext(mongoStore)
 
 	// messagingAddr := reqEnv("MESSAGESADDR")
 	// summaryAddr := reqEnv("SUMMARYADDR")
