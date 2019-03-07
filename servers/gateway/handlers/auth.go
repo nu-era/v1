@@ -51,5 +51,21 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 
+		err = ctx.WebSocketConnectionHandler(w, r, validDevice.ID)
+		if err != nil {
+			return
+		}
+		conn := ctx.WsConnections.Conns[validDevice.ID]
+		go heartbeat(conn)
+
+		// Respond to the client with an http.StatusCreated code, and
+		// the json encoded new user profile
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(201)
+		err = json.NewEncoder(w).Encode(validDevice)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
 	}
 }

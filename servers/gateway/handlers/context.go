@@ -7,14 +7,15 @@ import (
 // HandlerContext tracks the key that is used to sign and
 // validate SessionIDs, the sessions.Store, and the users.Store
 type HandlerContext struct {
-	DeviceStore devices.Store `json:"mongoStore"`
+	DeviceStore   devices.Store `json:"mongoStore"`
+	WsConnections *Connections  `json:"connections"`
 }
 
 //NewHandlerContext constructs a new HandlerContext,
 //ensuring that the dependencies are valid values
-func NewHandlerContext(deviceStore devices.Store) *HandlerContext {
-	if deviceStore == nil {
+func NewHandlerContext(deviceStore devices.Store, connections *Connections) *HandlerContext {
+	if deviceStore == nil || connections == nil {
 		panic("Parameters may not be empty!")
 	}
-	return &HandlerContext{deviceStore}
+	return &HandlerContext{deviceStore, connections}
 }
