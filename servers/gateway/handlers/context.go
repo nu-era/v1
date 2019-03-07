@@ -7,8 +7,8 @@ import (
 // HandlerContext tracks the key that is used to sign and
 // validate SessionIDs, the sessions.Store, and the users.Store
 type HandlerContext struct {
-	DeviceStore   devices.Store `json:"mongoStore"`
-	WsConnections *Connections  `json:"connections"`
+	DeviceStore   devices.Store
+	WsConnections *Connections
 }
 
 //NewHandlerContext constructs a new HandlerContext,

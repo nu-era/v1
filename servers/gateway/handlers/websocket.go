@@ -74,9 +74,13 @@ func (ctx *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *
 
 			if messageType == CloseMessage {
 				fmt.Println("Close message received.")
+				// TODO: SEND MSG TO DEVICE OWNER VIA OTHER MEDIUM
+				// TWILIO OR EMAIL
 				break
 			} else if err != nil {
 				fmt.Println("Error reading message.")
+				// TODO: SEND MSG TO DEVICE OWNER VIA OTHER MEDIUM
+				// TWILIO OR EMAIL
 				break
 			}
 
