@@ -38,4 +38,8 @@ channel.basic_publish(exchange='logs',
                       routing_key='',
                       body=message)
 print(" [x] Sent %r" % message)
+<<<<<<< HEAD
 connection.close()
+=======
+connection.close()
+>>>>>>> 5bf7f4fd5d994b500316b8e0e616ca9316917677

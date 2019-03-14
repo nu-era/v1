@@ -51,7 +51,7 @@ type NewDevice struct {
 type Updates struct {
 	Name   string  `json:"Name"`
 	Lat    float64 `json:"latitude"`
-	Long   float64 `json: "longitude"`
+	Long   float64 `json:"longitude"`
 	Email  string  `json:"email"`
 	Phone  string  `json:"phone"`
 	Status string  `json:"status"`
