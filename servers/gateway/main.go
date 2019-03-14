@@ -41,9 +41,16 @@ func main() {
 	// TODO: construct a new MongoStore, provide mongoSess as well as a
 	// database and collection name to use (device maybe?)
 
+	conn := handlers.NewConnections()
+	mongoStore := devices.NewMongoStore(mongoSess)
+	handlerCtx := handlers.NewHandlerContext(mongoStore, conn)
+
+	// messagingAddr := reqEnv("MESSAGESADDR")
+	// summaryAddr := reqEnv("SUMMARYADDR")
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
-	// mux.Handle("/websockets", NewWebSocketHandler(notifier))
+	mux.HandleFunc("/device", handlerCtx.DevicesHandler)
 
 	fmt.Printf("server is listening at https://%s\n", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, mux))
