@@ -1,20 +1,27 @@
-# consume.py
-import pika, os
+#!/usr/bin/env python
+import pika,os
 
-# Access the CLODUAMQP_URL environment variable and parse it (fallback to localhost)
-url = os.environ.get('CLOUDAMQP_URL', 'amqp://rkbyzjjk:1hAf-c13GnTylFcLNyphTtI6k8qN3031@beaver.rmq.cloudamqp.com/rkbyzjjk')
+url = os.environ.get('CLOUDAMQP_URL', 'http://ec2-54-68-59-121.us-west-2.compute.amazonaws.com')
 params = pika.URLParameters(url)
 connection = pika.BlockingConnection(params)
-channel = connection.channel() # start a channel
+channel = connection.channel()
 
-channel.queue_declare(queue='hello')
+channel.exchange_declare(exchange='logs',
+                         exchange_type='fanout')
+
+result = channel.queue_declare(exclusive=True)
+queue_name = result.method.queue
+
+channel.queue_bind(exchange='logs',
+                   queue=queue_name)
+
+print(' [*] Waiting for logs. To exit press CTRL+C')
 
 def callback(ch, method, properties, body):
-  print(" [x] Received %r" % body)
+    print(" [x] %r" % body)
 
 channel.basic_consume(callback,
-                      queue='hello',
+                      queue=queue_name,
                       no_ack=True)
 
-print(' [*] Waiting for messages:')
 channel.start_consuming()
