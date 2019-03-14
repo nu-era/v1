@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
