@@ -30,9 +30,9 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		newDevice := &devices.NewDevice{} // Create a empty NewDevice struct to be filled by request body
+		newDevice := devices.NewDevice{} // Create a empty NewDevice struct to be filled by request body
 		decoder := json.NewDecoder(r.Body)
-		if err := decoder.Decode(newDevice); err != nil {
+		if err := decoder.Decode(&newDevice); err != nil {
 			http.Error(w, "Request body unable to be decoded to new device", 400)
 			return
 		}

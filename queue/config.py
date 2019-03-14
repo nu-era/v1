@@ -1,0 +1,5 @@
+mqHOST = os.environ["RABBITMQ_HOST"]
+mqPORT = os.environ["RABBITMQ_PORT"]
+rUSER = os.environ["RABBITMQ_USER"] 
+rPW = os.environ["RABBITMQ_PW"]
+rmQueue = os.environ["QUEUE_NAME"]

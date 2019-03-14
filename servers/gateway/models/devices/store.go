@@ -23,7 +23,7 @@ type Store interface {
 
 	//Update applies Device updates to the given device ID
 	//and returns the newly-updated device
-	Update(bson.ObjectId, *Updates) (*Device, error)
+	Update(bson.ObjectId, *Updates) error
 
 	//Delete deletes the device with the given ObjectID
 	Delete(id bson.ObjectId) error
