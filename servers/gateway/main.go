@@ -44,8 +44,6 @@ func main() {
 	conn := handlers.NewConnections()
 	mongoStore := devices.NewMongoStore(mongoSess)
 	handlerCtx := handlers.NewHandlerContext(mongoStore, conn)
-	mongoStore := devices.NewMongoStore(mongoSess)
-	handlerCtx := handlers.NewHandlerContext(mongoStore)
 
 	// messagingAddr := reqEnv("MESSAGESADDR")
 	// summaryAddr := reqEnv("SUMMARYADDR")

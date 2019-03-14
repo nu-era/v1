@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 
+	"reflect"
+
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"reflect"
 )
 
 var noDeviceFound = errors.New("Device not found")
