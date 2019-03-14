@@ -40,7 +40,11 @@ func main() {
 
 	// TODO: construct a new MongoStore, provide mongoSess as well as a
 	// database and collection name to use (device maybe?)
+<<<<<<< HEAD
 	mongoStore := tasks.NewMongoStore(mongoSess, "devices", "devices")
+=======
+	mongoStore := devices.NewMongoStore(mongoSess)
+>>>>>>> 47550d9798a8f2b1d80770d26df1b466dbc525b1
 	handlerCtx := handlers.NewHandlerContext(mongoStore)
 
 	// messagingAddr := reqEnv("MESSAGESADDR")

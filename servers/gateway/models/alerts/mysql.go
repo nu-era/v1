@@ -66,5 +66,5 @@ func (mysql *MySqlStore) Insert(alt *Alert) (*Alert, error) {
 }
 
 func (mysql *MySqlStore) Update(id int64, upd *AlertUpdates) (*Alert, error) {
-
+	return nil, nil
 }

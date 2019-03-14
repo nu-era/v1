@@ -2,6 +2,7 @@ package devices
 
 import (
 	"errors"
+
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -18,11 +19,11 @@ type Store interface {
 
 	//Insert inserts the device into the database, and returns
 	//the newly-inserted device, complete with the DBMS-assigned bson.ObjectID
-	Insert(user *Device) (*Device, error)
+	Insert(device *Device) (*Device, error)
 
 	//Update applies Device updates to the given device ID
 	//and returns the newly-updated device
-	Update(id int64, updates *Device) (*Device, error)
+	Update(bson.ObjectId, *Updates) (*Device, error)
 
 	//Delete deletes the device with the given ObjectID
 	Delete(id bson.ObjectId) error
