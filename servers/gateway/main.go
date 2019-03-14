@@ -41,15 +41,6 @@ func main() {
 	// TODO: construct a new MongoStore, provide mongoSess as well as a
 	// database and collection name to use (device maybe?)
 
-	conn := handlers.NewConnections()
-	mongoStore := devices.NewMongoStore(mongoSess)
-	handlerCtx := handlers.NewHandlerContext(mongoStore, conn)
-	mongoStore := devices.NewMongoStore(mongoSess)
-	handlerCtx := handlers.NewHandlerContext(mongoStore)
-
-	// messagingAddr := reqEnv("MESSAGESADDR")
-	// summaryAddr := reqEnv("SUMMARYADDR")
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
 	// mux.Handle("/websockets", NewWebSocketHandler(notifier))
