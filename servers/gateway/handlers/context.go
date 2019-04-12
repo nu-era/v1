@@ -6,16 +6,29 @@ import (
 
 // HandlerContext tracks the key that is used to sign and
 // validate SessionIDs, the sessions.Store, and the users.Store
+//Context holds contex values for multiple handler functions
 type HandlerContext struct {
-	DeviceStore   devices.Store
+	signingKey  string
+	sessStore   sessions.Store
 	WsConnections *Connections
 }
 
 //NewHandlerContext constructs a new HandlerContext,
 //ensuring that the dependencies are valid values
-func NewHandlerContext(deviceStore devices.Store, connections *Connections) *HandlerContext {
-	if deviceStore == nil || connections == nil {
-		panic("Parameters may not be empty!")
+func NewHandlerContext(signingKey string, sessStore sessions.Store, deviceStore device.Store, connections *Connections) *Context {
+	if signingKey == "" {
+		panic("empty signing key")
 	}
-	return &HandlerContext{deviceStore, connections}
+	if sessStore == nil {
+		panic("nil session store")
+	}
+	if deviceStore == nil {
+		panic("nil device store")
+	}
+	return &HandlerContext{
+		signingKey:  signingKey,
+		sessStore:   sessStore,
+		deviceStore:  deviceStore,
+		WsConnections *Connections,
+	}
 }

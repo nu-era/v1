@@ -9,28 +9,36 @@ import (
 	"github.com/New-Era/servers/gateway/models/devices"
 )
 
-// Check request for 'Content-Type' header equal to 'application/json'. If
-// not correct content-type, returns error and writes 415 status response
+// Check request for 'Content-Type' header equal to the passed content type. If
+// not the correct content-type, returns error and writes 415 status response
 // to writer.
-func contentTypeCheck(w http.ResponseWriter, r *http.Request) error {
-	contentType := r.Header.Get("Content-Type")
+func contentTypeCheck(w http.ResponseWriter, r *http.Request, contentT string) error {
+	contentType := r.Header.Get(headerContentType)
 	typeList := strings.Split(contentType, ",") // Get the first content type
-	if len(typeList) == 0 || typeList[0] != "application/json" {
-		http.Error(w, "Request body must be of type JSON", 415)
-		return fmt.Errorf("Incorrect Content Type")
+	if len(typeList) == 0 || typeList[0] != contentT {
+		http.Error(w, "Incorrect Content Type", http.statusUnsupportedMediaType)
+		return
 	}
 	return nil
 }
 
+// Post: registering a new device, create new session with device
+// Get: Create a new session for a registered device
+
 func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" && r.Method != "GET" {
+		http.Error(w, "method must be Post or Get", http.statusMethodNotAllowed)
+		return
+	}
+
 	if r.Method == http.MethodPost {
 		// Check to make sure content-type is application/json
-		err := contentTypeCheck(w, r)
+		err := contentTypeCheck(w, r, contentTypeJSON)
 		if err != nil {
 			return
 		}
 
-		newDevice := devices.NewDevice{} // Create a empty NewDevice struct to be filled by request body
+		newDevice := devices.NewDevice{} // Create an empty NewDevice struct to be filled by request body
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&newDevice); err != nil {
 			http.Error(w, "Request body unable to be decoded to new device", 400)
