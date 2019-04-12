@@ -63,6 +63,7 @@ func (ctx *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *
 		http.Error(w, "Failed to open websocket connection", 401)
 		return err
 	}
+	fmt.Println("Opened Websocket Connection")
 
 	ctx.WsConnections.Add(deviceID, conn)
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
