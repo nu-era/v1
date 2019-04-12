@@ -76,9 +76,6 @@ func main() {
 	conn := handlers.NewConnections()
 	handlerCtx := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
 
-	// messagingAddr := reqEnv("MESSAGESADDR")
-	// summaryAddr := reqEnv("SUMMARYADDR")
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
 	mux.HandleFunc("/device", handlerCtx.DevicesHandler)
@@ -125,7 +122,7 @@ func CustomDirectorRR(targets []string, hc *handlers.HandlerContext) Director {
 // before being passed along
 func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 	return func(r *http.Request) {
-		r.Header.Del("X-device") // remove any previous user
+		r.Header.Del("X-Device") // remove any previous user
 		tmp := handlers.SessionState{}
 		_, _ = s.GetState(r, hc.Key, hc.Session, &tmp)
 		if tmp.Device.ID != 0 { // set if user exists

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -16,7 +15,7 @@ func contentTypeCheck(w http.ResponseWriter, r *http.Request, contentT string) e
 	contentType := r.Header.Get(headerContentType)
 	typeList := strings.Split(contentType, ",") // Get the first content type
 	if len(typeList) == 0 || typeList[0] != contentT {
-		http.Error(w, "Incorrect Content Type", http.statusUnsupportedMediaType)
+		http.Error(w, "Incorrect Content Type", http.StatusUnsupportedMediaType)
 		return
 	}
 	return nil
@@ -27,7 +26,7 @@ func contentTypeCheck(w http.ResponseWriter, r *http.Request, contentT string) e
 
 func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" && r.Method != "GET" {
-		http.Error(w, "method must be Post or Get", http.statusMethodNotAllowed)
+		http.Error(w, "method must be Post or Get", http.StatusMethodNotAllowed)
 		return
 	}
 

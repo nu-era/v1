@@ -2,14 +2,15 @@ package handlers
 
 import (
 	"github.com/New-Era/servers/gateway/models/devices"
+	"github.com/New-Era/servers/gateway/sessions"
 )
 
 // HandlerContext tracks the key that is used to sign and
 // validate SessionIDs, the sessions.Store, and the users.Store
 //Context holds contex values for multiple handler functions
 type HandlerContext struct {
-	signingKey  string
-	sessStore   sessions.Store
+	signingKey    string
+	sessStore     sessions.Store
 	WsConnections *Connections
 }
 
@@ -28,7 +29,7 @@ func NewHandlerContext(signingKey string, sessStore sessions.Store, deviceStore 
 	return &HandlerContext{
 		signingKey:  signingKey,
 		sessStore:   sessStore,
-		deviceStore:  deviceStore,
-		WsConnections *Connections,
+		deviceStore: deviceStore,
+		WsConnections * Connections,
 	}
 }

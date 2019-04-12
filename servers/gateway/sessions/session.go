@@ -13,6 +13,7 @@ const schemeBearer = "Bearer "
 
 //Empty struct for deleting sessionState
 type session struct{}
+type SessionID string
 
 //ErrNoSessionID is used when no session ID was found in the Authorization header
 var ErrNoSessionID = errors.New("no session ID found in " + headerAuthorization + " header")
@@ -22,7 +23,7 @@ var ErrInvalidScheme = errors.New("authorization scheme not supported")
 
 //BeginSession creates a new SessionID, saves the `sessionState` to the store, adds an
 //Authorization header to the response with the SessionID, and returns the new SessionID
-func BeginSession(signingKey string, store Store, sessionState interface{}, w http.ResponseWriter) (SessionID, error) {
+func BeginSession(signingKey string, store RedisStore, sessionState interface{}, w http.ResponseWriter) (SessionID, error) {
 	sessionID, err := NewSessionID(signingKey)
 	if err != nil {
 		return InvalidSessionID, fmt.Errorf("error creating session id %v", err)
@@ -49,7 +50,7 @@ func GetSessionID(r *http.Request, signingKey string) (SessionID, error) {
 //GetState extracts the SessionID from the request,
 //gets the associated state from the provided store into
 //the `sessionState` parameter, and returns the SessionID
-func GetState(r *http.Request, signingKey string, store Store, sessionState interface{}) (SessionID, error) {
+func GetState(r *http.Request, signingKey string, store RedisStore, sessionState interface{}) (SessionID, error) {
 	sessionID, err := GetSessionID(r, signingKey)
 	if err != nil { // Returns InvalidSessionID
 		return sessionID, err
@@ -63,7 +64,7 @@ func GetState(r *http.Request, signingKey string, store Store, sessionState inte
 //EndSession extracts the SessionID from the request,
 //and deletes the associated data in the provided store, returning
 //the extracted SessionID.
-func EndSession(r *http.Request, signingKey string, store Store) (SessionID, error) {
+func EndSession(r *http.Request, signingKey string, store RedisStore) (SessionID, error) {
 	sessionID, err := GetState(r, signingKey, store, &session{})
 	if err != nil {
 		return sessionID, err
