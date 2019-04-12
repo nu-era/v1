@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import pika,os
+import json
+
 
 url = os.environ.get('CLOUDAMQP_URL', 'http://ec2-54-68-59-121.us-west-2.compute.amazonaws.com')
 params = pika.URLParameters(url)
@@ -11,6 +13,7 @@ channel.exchange_declare(exchange='logs',
 
 result = channel.queue_declare(exclusive=True)
 queue_name = result.method.queue
+# print(result.method)
 
 channel.queue_bind(exchange='logs',
                    queue=queue_name)
@@ -18,7 +21,7 @@ channel.queue_bind(exchange='logs',
 print(' [*] Waiting for logs. To exit press CTRL+C')
 
 def callback(ch, method, properties, body):
-    print(" [x] %r" % body)
+    print(" [x] " + json.loads(body).get("message"))
 
 channel.basic_consume(callback,
                       queue=queue_name,
