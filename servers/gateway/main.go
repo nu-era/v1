@@ -1,13 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/New-Era/servers/gateway/handlers"
 	"github.com/New-Era/servers/gateway/models/devices"
+	"github.com/New-Era/servers/gateway/sessions"
 	mgo "gopkg.in/mgo.v2"
 )
 
