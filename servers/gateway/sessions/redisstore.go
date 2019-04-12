@@ -2,6 +2,7 @@ package sessions
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -9,7 +10,11 @@ import (
 	"github.com/go-redis/redis"
 )
 
-//RedisStore represents a session.Store backed by redis.
+//ErrStateNotFound is returned from redissstore.Get() when the requested
+//session id was not found in the store
+var ErrStateNotFound = errors.New("no session state was found in the session store")
+
+//RedisStore represents a session backed by redis.
 type RedisStore struct {
 	//Redis client used to talk to redis server.
 	Client *redis.Client
@@ -22,8 +27,6 @@ func NewRedisStore(client *redis.Client, sessionDuration time.Duration) *RedisSt
 	//initialize and return a new RedisStore struct
 	return &RedisStore{Client: client, SessionDuration: sessionDuration}
 }
-
-//Store implementation
 
 //Save saves the provided `sessionState` and associated SessionID to the store.
 //The `sessionState` parameter is typically a pointer to a struct containing
