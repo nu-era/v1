@@ -13,7 +13,6 @@ const schemeBearer = "Bearer "
 
 //Empty struct for deleting sessionState
 type session struct{}
-type SessionID string
 
 //ErrNoSessionID is used when no session ID was found in the Authorization header
 var ErrNoSessionID = errors.New("no session ID found in " + headerAuthorization + " header")

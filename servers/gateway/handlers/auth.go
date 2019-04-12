@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/New-Era/servers/gateway/models/devices"
 	"net/http"
 	"strings"
-
-	"github.com/New-Era/servers/gateway/models/devices"
 )
 
 // Check request for 'Content-Type' header equal to the passed content type. If
@@ -16,7 +16,7 @@ func contentTypeCheck(w http.ResponseWriter, r *http.Request, contentT string) e
 	typeList := strings.Split(contentType, ",") // Get the first content type
 	if len(typeList) == 0 || typeList[0] != contentT {
 		http.Error(w, "Incorrect Content Type", http.StatusUnsupportedMediaType)
-		return
+		return fmt.Errorf("Incorrect Content-Type")
 	}
 	return nil
 }

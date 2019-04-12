@@ -2,12 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"time"
 	"encoding/json"
+	"fmt"
 	"github.com/New-Era/servers/gateway/handlers"
 	"github.com/New-Era/servers/gateway/models/devices"
 	"github.com/New-Era/servers/gateway/sessions"
@@ -17,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"sync/atomic"
+	"time"
 )
 
 // main entry point for the server
@@ -81,6 +78,12 @@ func main() {
 	deviceStore := devices.NewMongoStore(mongoSess)
 	conn := handlers.NewConnections()
 	handlerCtx := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
+
+	// addresses of websocket microservice instances
+	wc := strings.Split(os.Getenv("WCADDRS"), ",")
+
+	// proxy for websocket microservice
+	wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, &hc)}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)

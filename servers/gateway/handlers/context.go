@@ -9,27 +9,28 @@ import (
 // validate SessionIDs, the sessions.Store, and the users.Store
 //Context holds contex values for multiple handler functions
 type HandlerContext struct {
-	signingKey    string
-	sessStore     sessions.Store
+	SigningKey    string
+	SessStore     sessions.RedisStore
+	DeviceStore   devices.Store
 	WsConnections *Connections
 }
 
 //NewHandlerContext constructs a new HandlerContext,
 //ensuring that the dependencies are valid values
-func NewHandlerContext(signingKey string, sessStore sessions.Store, deviceStore device.Store, connections *Connections) *Context {
+func NewHandlerContext(signingKey string, sessStore sessions.RedisStore, deviceStore devices.Store, connections *Connections) *HandlerContext {
 	if signingKey == "" {
 		panic("empty signing key")
 	}
-	if sessStore == nil {
+	if sessStore == (sessions.RedisStore{}) {
 		panic("nil session store")
 	}
 	if deviceStore == nil {
 		panic("nil device store")
 	}
 	return &HandlerContext{
-		signingKey:  signingKey,
-		sessStore:   sessStore,
-		deviceStore: deviceStore,
-		WsConnections * Connections,
+		SigningKey:    signingKey,
+		SessStore:     sessStore,
+		DeviceStore:   deviceStore,
+		WsConnections: connections,
 	}
 }
