@@ -1,5 +1,18 @@
+# publish.py
+#import pika, os, datetime
 
-#!/usr/bin/env python
+# Access Docker container running RabbitMQ
+# creds = pika.PlainCredentials(config.rUSER, config.rPW)
+# conn = pika.BlockingConnection(pika.ConnectionParameters(host=config.mqHOST, port=config.mqPORT, credentials=creds, heartbeat=0))
+# mq_chan = conn.channel()
+# channel.queue_declare(queue='alerts') # Declare a queue
+# channel.basic_publish(exchange='',
+#                       routing_key='alerts',
+#                       body='Nu-era test message for Marlina!')
+
+# print(" [x] Sent 'Hello World!'")
+# connection.close()
+
 import pika
 import sys, os
 import json
