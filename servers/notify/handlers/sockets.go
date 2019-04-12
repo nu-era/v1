@@ -18,7 +18,7 @@ type SocketStore struct {
 	Chan        *amqp.Channel
 }
 
-// NewSocketStore returns a new socket store containing a map of user id's to
+// NewSocketStore returns a new socket store containing a map of device id's to
 // a websocket, a mutex lock for concurrent use and a queue channel for real time
 // notifications
 func NewSocketStore() *SocketStore {
@@ -72,11 +72,11 @@ func (s *SocketStore) RemoveConnection(id int64) {
 // WriteToValidConnections sends messages to a subset of connections
 // (if the message is intended for a private channel), or to all of them (if the message
 // is posted on a public channel
-func (s *SocketStore) WriteToValidConnections(userIDs []int64, messageType int, data []byte) error {
-	fmt.Println("Number of users to send to: %d", len(userIDs))
+func (s *SocketStore) WriteToValidConnections(deviceIDs []int64, messageType int, data []byte) error {
+	fmt.Println("Number of devices to send to: %d", len(deviceIDs))
 	var writeError error
-	if len(userIDs) > 0 { // private channel
-		for _, id := range userIDs {
+	if len(deviceIDs) > 0 { // private channel
+		for _, id := range deviceIDs {
 			writeError = s.Connections[id].WriteMessage(messageType, data)
 			if writeError != nil {
 				return writeError
@@ -101,7 +101,7 @@ type Message struct {
 	ChannelID int64                  `json:"channelID,omitempty"`
 	Message   map[string]interface{} `json:"message,omitempty"`
 	MessageID int64                  `json:"messageID,omitempty"`
-	UserIDs   []int64                `json:"userIDs,omitempty"`
+	deviceIDs []int64                `json:"deviceIDs,omitempty"`
 }
 
 // upgrader is a variable that stores websocket information and verifies
@@ -119,17 +119,17 @@ var upgrader = websocket.Upgrader{
 }
 
 // WebSocketConnectionHandler handles when the client requests an upgrade to a websocket
-// if the user is valid (request comes from proper host, user exists) upgrade is performed
+// if the device is valid (request comes from proper host, device exists) upgrade is performed
 // and connection is stored for duration of client session
 func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("UPGRADING TO WEBSOCKET")
-	if r.Header.Get("X-User") == "" {
+	if r.Header.Get("X-Device") == "" {
 		http.Error(w, "Unauthorized Access", 401)
 		return
 	}
-	fmt.Println(r.Header.Get("X-User"))
+	fmt.Println(r.Header.Get("X-Device"))
 	var dest map[string]interface{}
-	if err := json.Unmarshal([]byte(r.Header.Get("X-User")), &dest); err != nil {
+	if err := json.Unmarshal([]byte(r.Header.Get("X-Device")), &dest); err != nil {
 		fmt.Printf("error getting message body, %v", err)
 		http.Error(w, "Bad Request", 400)
 		return
@@ -147,9 +147,9 @@ func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *ht
 	// Insert our connection onto our datastructure for ongoing usage
 	hc.Sockets.InsertConnection(dest["id"].(int64), conn)
 	// Invoke a goroutine for handling control messages from this connection
-	go (func(conn *websocket.Conn, userID int64) {
+	go (func(conn *websocket.Conn, deviceID int64) {
 		defer conn.Close()
-		defer hc.Sockets.RemoveConnection(userID)
+		defer hc.Sockets.RemoveConnection(deviceID)
 
 		for {
 			messageType, p, err := conn.ReadMessage()
@@ -209,9 +209,9 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 			fmt.Printf("error getting message body, %v", err)
 			break
 		}
-		if event["userIDs"] != nil {
-			ids := make([]int64, len(event["userIDs"].([]interface{})))
-			for i, v := range event["userIDs"].([]interface{}) {
+		if event["deviceIDs"] != nil {
+			ids := make([]int64, len(event["deviceIDs"].([]interface{})))
+			for i, v := range event["deviceIDs"].([]interface{}) {
 				ids[i] = int64(v.(float64))
 			}
 			s.WriteToValidConnections(ids, TextMessage, e.Body)
