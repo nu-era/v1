@@ -2,12 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"time"
 	"encoding/json"
+	"fmt"
 	"github.com/New-Era/servers/gateway/handlers"
 	"github.com/New-Era/servers/gateway/models/devices"
 	"github.com/New-Era/servers/gateway/sessions"
@@ -17,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"sync/atomic"
+	"time"
 )
 
 // main entry point for the server
@@ -82,8 +79,11 @@ func main() {
 	conn := handlers.NewConnections()
 	handlerCtx := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
 
-	// messagingAddr := reqEnv("MESSAGESADDR")
-	// summaryAddr := reqEnv("SUMMARYADDR")
+	// addresses of websocket microservice instances
+	wc := strings.Split(os.Getenv("WCADDRS"), ",")
+
+	// proxy for websocket microservice
+	wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, &hc)}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
@@ -131,7 +131,7 @@ func CustomDirectorRR(targets []string, hc *handlers.HandlerContext) Director {
 // before being passed along
 func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 	return func(r *http.Request) {
-		r.Header.Del("X-device") // remove any previous user
+		r.Header.Del("X-Device") // remove any previous user
 		tmp := handlers.SessionState{}
 		_, _ = s.GetState(r, hc.Key, hc.Session, &tmp)
 		if tmp.Device.ID != 0 { // set if user exists

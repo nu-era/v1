@@ -21,7 +21,7 @@ func NewHandlerContext(signingKey string, sessStore *sessions.RedisStore, device
 	if signingKey == "" {
 		panic("empty signing key")
 	}
-	if sessStore == nil {
+	if sessStore == (sessions.RedisStore{}) {
 		panic("nil session store")
 	}
 	if deviceStore == nil {
