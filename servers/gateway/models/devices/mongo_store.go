@@ -77,7 +77,7 @@ func (ms *MongoStore) Insert(dev *Device) (*Device, error) {
 //Update applies DeviceUpdates to the given device ID
 //and returns an error if any occur
 func (ms *MongoStore) Update(id bson.ObjectId, updates *Updates) error {
-	if len(id) < 1 || reflect.DeepEqual(Updates{}, updates) {
+	if len(id) < 1 {
 		return invalidQuery
 	}
 	coll := ms.ses.DB("store").C("devices")
@@ -85,16 +85,6 @@ func (ms *MongoStore) Update(id bson.ObjectId, updates *Updates) error {
 	if err := coll.UpdateId(id, bson.M{"$set": updates}); err != nil {
 		return err
 	}
-
-	// *** device.go handles the rest ***
-	// dev, err := ms.GetByID(id)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if err = dev.ApplyUpdates(updates); err != nil {
-	// 	return nil, err
-	// }
 	return nil
 }
 

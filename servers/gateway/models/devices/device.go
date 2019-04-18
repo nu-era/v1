@@ -9,6 +9,9 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+//ErrUserNotFound is returned when the user can't be found
+var ErrDeviceNotFound = errors.New("Device not found")
+
 //bcryptCost is the default bcrypt cost to use when hashing passwords
 var bcryptCost = 13
 
@@ -31,7 +34,7 @@ type Device struct {
 //// Maybe just a password that we can reference in a lookup table via hash
 //// for authorized users?
 type Credentials struct {
-	Email    string `json:"email"`
+	Name     string `json:"name"`
 	Password string `json:"password"`
 }
 
@@ -70,7 +73,7 @@ func (nu *NewDevice) Validate() error {
 		return fmt.Errorf("Password must match PasswordConf, got Password: %s and PasswordConf: %s", nu.Password, nu.PasswordConf)
 	}
 	if len(nu.Name) < 1 {
-		return fmt.Errorf("Name must have non-zero length and contain no spaces, got %s", nu.Name)
+		return fmt.Errorf("Name must have non-zero length, got %s", nu.Name)
 	}
 	if len(nu.Email) < 1 {
 		return fmt.Errorf("Email must be provided, got %s", nu.Email)
@@ -78,6 +81,7 @@ func (nu *NewDevice) Validate() error {
 	if nu.Lat == 0 || nu.Long == 0 {
 		return fmt.Errorf("Location must be provided, got lat:%b, long:%b", nu.Lat, nu.Long)
 	}
+	//TODO: Restrict to only washington state area
 
 	return nil
 }

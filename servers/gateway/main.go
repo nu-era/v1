@@ -1,19 +1,20 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/New-Era/servers/gateway/handlers"
-	"github.com/New-Era/servers/gateway/models/devices"
-	"github.com/New-Era/servers/gateway/sessions"
-	mgo "gopkg.in/mgo.v2"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"sync/atomic"
 	"time"
+
+	"github.com/New-Era/servers/gateway/handlers"
+	"github.com/New-Era/servers/gateway/models/devices"
+	"github.com/New-Era/servers/gateway/sessions"
+	"github.com/go-redis/redis"
+	mgo "gopkg.in/mgo.v2"
 )
 
 // main entry point for the server
@@ -24,9 +25,9 @@ func main() {
 		addr = ":443"
 	}
 
-	sessionKey = os.Getenv("SESSIONKEY")
+	sessionKey := os.Getenv("SESSIONKEY")
 	if len(sessionKey) == 0 {
-		log.fatal("please set session key")
+		log.Fatal("please set session key")
 	}
 
 	tlscert := os.Getenv("TLSCERT")
@@ -65,29 +66,29 @@ func main() {
 
 	// MYSQL DB CONNECTION
 	// Construct MySql serve
-	dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/mysql",
-		os.Getenv("MYSQL_ROOT_PASSWORD"))
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		fmt.Printf("error opening database: %v\n", err)
-		os.Exit(1)
-	}
-	defer db.Close()
+	// dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/mysql",
+	// 	os.Getenv("MYSQL_ROOT_PASSWORD"))
+	// db, err := sql.Open("mysql", dsn)
+	// if err != nil {
+	// 	fmt.Printf("error opening database: %v\n", err)
+	// 	os.Exit(1)
+	// }
+	// defer db.Close()
 
-	sessStore = sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
+	sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
 	deviceStore := devices.NewMongoStore(mongoSess)
 	conn := handlers.NewConnections()
-	handlerCtx := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
+	hc := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
 
 	// addresses of websocket microservice instances
-	wc := strings.Split(os.Getenv("WCADDRS"), ",")
+	//wc := strings.Split(os.Getenv("WCADDRS"), ",")
 
 	// proxy for websocket microservice
-	wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, &hc)}
+	//wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, hc)}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
-	mux.HandleFunc("/device", handlerCtx.DevicesHandler)
+	mux.HandleFunc("/device", hc.DevicesHandler)
 
 	fmt.Printf("server is listening at https://%s\n", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, mux))
@@ -111,8 +112,8 @@ func CustomDirectorRR(targets []string, hc *handlers.HandlerContext) Director {
 	return func(r *http.Request) {
 		r.Header.Del("X-Device") // remove any previous user
 		tmp := handlers.SessionState{}
-		_, _ = s.GetState(r, hc.Key, hc.Session, &tmp)
-		if tmp.Device.ID != 0 { // set if user exists
+		_, _ = sessions.GetState(r, hc.SigningKey, hc.SessStore, &tmp)
+		if tmp.Device.ID != "" { // set if user exists
 			j, err := json.Marshal(tmp.Device)
 			if err != nil {
 				fmt.Println(err)
@@ -133,9 +134,9 @@ func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 	return func(r *http.Request) {
 		r.Header.Del("X-Device") // remove any previous user
 		tmp := handlers.SessionState{}
-		_, _ = s.GetState(r, hc.Key, hc.Session, &tmp)
-		if tmp.Device.ID != 0 { // set if user exists
-			j, err := json.Marshal(tmp.User)
+		_, _ = sessions.GetState(r, hc.SigningKey, hc.SessStore, &tmp)
+		if tmp.Device.ID != "" { // set if user exists
+			j, err := json.Marshal(tmp.Device)
 			if err != nil {
 				fmt.Println(err)
 				return

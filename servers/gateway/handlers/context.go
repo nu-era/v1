@@ -11,17 +11,17 @@ import (
 type HandlerContext struct {
 	SigningKey    string
 	SessStore     sessions.RedisStore
-	DeviceStore   devices.Store
+	deviceStore   devices.MongoStore
 	WsConnections *Connections
 }
 
 //NewHandlerContext constructs a new HandlerContext,
 //ensuring that the dependencies are valid values
-func NewHandlerContext(signingKey string, sessStore sessions.RedisStore, deviceStore devices.Store, connections *Connections) *HandlerContext {
+func NewHandlerContext(signingKey string, sessStore *sessions.RedisStore, deviceStore *devices.MongoStore, connections *Connections) *HandlerContext {
 	if signingKey == "" {
 		panic("empty signing key")
 	}
-	if sessStore == (sessions.RedisStore{}) {
+	if sessStore == nil {
 		panic("nil session store")
 	}
 	if deviceStore == nil {
@@ -29,8 +29,8 @@ func NewHandlerContext(signingKey string, sessStore sessions.RedisStore, deviceS
 	}
 	return &HandlerContext{
 		SigningKey:    signingKey,
-		SessStore:     sessStore,
-		DeviceStore:   deviceStore,
+		SessStore:     *sessStore,
+		deviceStore:   *deviceStore,
 		WsConnections: connections,
 	}
 }
