@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/TriviaRoulette/servers/notify/handlers"
+	"github.com/New-Era/servers/notify/handlers"
 	"log"
 	"net/http"
 	"os"
