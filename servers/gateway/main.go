@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -67,14 +66,14 @@ func main() {
 
 	// MYSQL DB CONNECTION
 	// Construct MySql serve
-	dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/mysql",
-		os.Getenv("MYSQL_ROOT_PASSWORD"))
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		fmt.Printf("error opening database: %v\n", err)
-		os.Exit(1)
-	}
-	defer db.Close()
+	// dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/mysql",
+	// 	os.Getenv("MYSQL_ROOT_PASSWORD"))
+	// db, err := sql.Open("mysql", dsn)
+	// if err != nil {
+	// 	fmt.Printf("error opening database: %v\n", err)
+	// 	os.Exit(1)
+	// }
+	// defer db.Close()
 
 	sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
 	deviceStore := devices.NewMongoStore(mongoSess)
