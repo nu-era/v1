@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -e
 ./build.sh
-docker push ericjwei/gateway
-docker push ericjwei/mysql  
+docker push newera/gateway
+docker push newera/mysql  
 
-export TLSCERT=/etc/letsencrypt/live/api.ericjcwei.me/fullchain.pem
-export TLSKEY=/etc/letsencrypt/live/api.ericjcwei.me/privkey.pem
+#export TLSCERT=/etc/letsencrypt/live/api.ericjcwei.me/fullchain.pem
+#export TLSKEY=/etc/letsencrypt/live/api.ericjcwei.me/privkey.pem
 export MESSAGESADDR="messaging:80"
 export SUMMARYADDR="summary:80"
 export REDISADDR="redisserver:6379"
 
-ssh -i ~/.ssh/MyPrivKey.pem ec2-user@ec2-54-201-207-200.us-west-2.compute.amazonaws.com 'bash -s' << EOF
+ssh -i ~/.ssh/MyPrivKey.pem ec2-54-68-59-121.us-west-2.compute.amazonaws.com 'bash -s' << EOF
 #Cleanup existing docker images
-docker pull ericjwei/gateway
-docker pull ericjwei/mysql
+docker pull newera/gateway
+docker pull newera/mysql
 docker rm -f gateway
 docker rm -f mysql
 docker rm -f redisserver

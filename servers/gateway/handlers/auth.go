@@ -43,7 +43,7 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	newSession := &SessionState{StartTime: time.Now(), Device: device}
-	if _, err := sessions.BeginSession(ctx.signingKey, ctx.sessStore, newSession, w); err != nil {
+	if _, err := sessions.BeginSession(ctx.SigningKey, ctx.SessStore, newSession, w); err != nil {
 		http.Error(w, fmt.Sprintf("error creating new session: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -56,7 +56,7 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 // PATCH updates the device name
 func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	sessionState := &SessionState{}
-	sessID, err := sessions.GetState(r, ctx.signingKey, ctx.sessStore, sessionState)
+	sessID, err := sessions.GetState(r, ctx.SigningKey, ctx.SessStore, sessionState)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("problem with session %v", err), http.StatusUnauthorized)
 		return
@@ -102,7 +102,7 @@ func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.
 		}
 
 		sessionState.Device = device
-		if err := ctx.sessStore.Save(sessID, sessionState); err != nil {
+		if err := ctx.SessStore.Save(sessID, sessionState); err != nil {
 			http.Error(w, fmt.Sprintf("error updating session state: %v", err), http.StatusInternalServerError)
 			return
 		}
@@ -139,7 +139,7 @@ func (ctx *HandlerContext) SessionsHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	newSession := &SessionState{StartTime: time.Now(), Device: device}
-	if _, err := sessions.BeginSession(ctx.signingKey, ctx.sessStore, newSession, w); err != nil {
+	if _, err := sessions.BeginSession(ctx.SigningKey, ctx.SessStore, newSession, w); err != nil {
 		http.Error(w, fmt.Sprintf("error creating new session: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -166,7 +166,7 @@ func (ctx *HandlerContext) SpecificSessionHandler(w http.ResponseWriter, r *http
 		http.Error(w, "unknown path segment", http.StatusForbidden)
 		return
 	}
-	if _, err := sessions.EndSession(r, ctx.signingKey, ctx.sessStore); err != nil {
+	if _, err := sessions.EndSession(r, ctx.SigningKey, ctx.SessStore); err != nil {
 		http.Error(w, fmt.Sprintf("session not found: %v", err), http.StatusBadRequest)
 		return
 	}
