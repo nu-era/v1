@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
+	"gopkg.in/mgo.v2/bson"
 	"net/http"
-	"strings"
+	//"strings"
 	"sync"
 )
 
 // SocketStore contains client connection information
 // and a queue channel for sending notifications
 type SocketStore struct {
-	Connections map[int64]*websocket.Conn
+	Connections map[bson.ObjectId]*websocket.Conn
 	lock        sync.Mutex
 	Chan        *amqp.Channel
 }
@@ -22,7 +23,7 @@ type SocketStore struct {
 // a websocket, a mutex lock for concurrent use and a queue channel for real time
 // notifications
 func NewSocketStore() *SocketStore {
-	return &SocketStore{Connections: map[int64]*websocket.Conn{}}
+	return &SocketStore{Connections: map[bson.ObjectId]*websocket.Conn{}}
 }
 
 // Control messages for websocket
@@ -52,7 +53,7 @@ const (
 )
 
 // InsertConnection is a Thread-safe method for inserting a connection
-func (s *SocketStore) InsertConnection(id int64, conn *websocket.Conn) {
+func (s *SocketStore) InsertConnection(id bson.ObjectId, conn *websocket.Conn) {
 	s.lock.Lock()
 	// insert socket connection
 	s.Connections[id] = conn
@@ -60,7 +61,7 @@ func (s *SocketStore) InsertConnection(id int64, conn *websocket.Conn) {
 }
 
 // RemoveConnection is a Thread-safe method for removing a connection
-func (s *SocketStore) RemoveConnection(id int64) {
+func (s *SocketStore) RemoveConnection(id bson.ObjectId) {
 	s.lock.Lock()
 	_, ok := s.Connections[id]
 	if ok {
@@ -72,7 +73,7 @@ func (s *SocketStore) RemoveConnection(id int64) {
 // WriteToValidConnections sends messages to a subset of connections
 // (if the message is intended for a private channel), or to all of them (if the message
 // is posted on a public channel
-func (s *SocketStore) WriteToValidConnections(deviceIDs []int64, messageType int, data []byte) error {
+func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, messageType int, data []byte) error {
 	fmt.Println("Number of devices to send to: %d", len(deviceIDs))
 	var writeError error
 	if len(deviceIDs) > 0 { // private channel
@@ -110,11 +111,12 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		orig := r.Header.Get("Origin")
-		if strings.Contains(orig, "jmatray.me") || strings.Contains(orig, "bfranzen.me") {
-			return true
-		}
-		return false
+		// orig := r.Header.Get("Origin")
+		// fmt.Println(orig)
+		// if strings.Contains(orig, "jmatray.me") || strings.Contains(orig, "bfranzen.me") {
+		// 	return true
+		// }
+		return true
 	},
 }
 
@@ -127,7 +129,6 @@ func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *ht
 		http.Error(w, "Unauthorized Access", 401)
 		return
 	}
-	fmt.Println(r.Header.Get("X-Device"))
 	var dest map[string]interface{}
 	if err := json.Unmarshal([]byte(r.Header.Get("X-Device")), &dest); err != nil {
 		fmt.Printf("error getting message body, %v", err)
@@ -135,19 +136,22 @@ func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *ht
 		return
 	}
 	fmt.Println(dest)
-	fmt.Println(dest["id"])
 
 	// handle the websocket handshake
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		fmt.Printf("ERROR OPENING CONNECTION: ", err)
 		http.Error(w, "Failed to open websocket connection", 401)
 		return
 	}
 
+	fmt.Println("CONNECTION UPGRADED")
 	// Insert our connection onto our datastructure for ongoing usage
-	hc.Sockets.InsertConnection(dest["id"].(int64), conn)
+	hc.Sockets.InsertConnection(dest["ID"].(bson.ObjectId), conn)
 	// Invoke a goroutine for handling control messages from this connection
-	go (func(conn *websocket.Conn, deviceID int64) {
+	fmt.Println("CONNECTION INSERTED")
+
+	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()
 		defer hc.Sockets.RemoveConnection(deviceID)
 
@@ -168,7 +172,7 @@ func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *ht
 			// ignore ping and pong messages
 		}
 
-	})(conn, dest["id"].(int64))
+	})(conn, dest["ID"].(bson.ObjectId))
 }
 
 // ConnectQueue connects to the RabbitMQ service at the address defined in the addr variable
@@ -210,13 +214,13 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 			break
 		}
 		if event["deviceIDs"] != nil {
-			ids := make([]int64, len(event["deviceIDs"].([]interface{})))
+			ids := make([]bson.ObjectId, len(event["deviceIDs"].([]interface{})))
 			for i, v := range event["deviceIDs"].([]interface{}) {
-				ids[i] = int64(v.(float64))
+				ids[i] = v.(bson.ObjectId)
 			}
 			s.WriteToValidConnections(ids, TextMessage, e.Body)
 		} else {
-			s.WriteToValidConnections([]int64{}, TextMessage, e.Body)
+			s.WriteToValidConnections([]bson.ObjectId{}, TextMessage, e.Body)
 		}
 
 	}

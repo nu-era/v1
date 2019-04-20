@@ -1,20 +1,22 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
-	"sync/atomic"
-	"time"
-
 	"github.com/New-Era/servers/gateway/handlers"
 	"github.com/New-Era/servers/gateway/models/devices"
 	"github.com/New-Era/servers/gateway/sessions"
 	"github.com/go-redis/redis"
 	mgo "gopkg.in/mgo.v2"
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"os"
+	"strings"
+	"sync/atomic"
+	"time"
 )
 
 // main entry point for the server
@@ -81,15 +83,15 @@ func main() {
 	hc := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
 
 	// addresses of websocket microservice instances
-	//wc := strings.Split(os.Getenv("WCADDRS"), ",")
+	wc := strings.Split(os.Getenv("WCADDRS"), ",")
 
 	// proxy for websocket microservice
-	//wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, hc)}
+	wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, hc)}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
 	mux.HandleFunc("/device", hc.DevicesHandler)
-
+	mux.Handle("/ws", wcProxy)
 	fmt.Printf("server is listening at https://%s\n", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, mux))
 }
@@ -122,7 +124,12 @@ func CustomDirectorRR(targets []string, hc *handlers.HandlerContext) Director {
 			r.Header.Set("X-Device", string(j))
 		}
 		r.Header.Add("X-Forwarded-Host", r.Host)
-		r.URL.Scheme = "http"
+		if strings.HasPrefix(dest.String(), "wc") {
+			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			r.URL.Scheme = "https"
+		} else {
+			r.URL.Scheme = "http"
+		}
 		r.URL.Host = dest.String()
 		r.Host = dest.String()
 	}
@@ -144,7 +151,12 @@ func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 			r.Header.Set("X-Device", string(j))
 		}
 		r.Header.Add("X-Forwarded-Host", r.Host)
-		r.URL.Scheme = "http"
+		if strings.HasPrefix(target.String(), "wc") {
+			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			r.URL.Scheme = "https"
+		} else {
+			r.URL.Scheme = "http"
+		}
 		r.URL.Host = target.String()
 		r.Host = target.String()
 	}
