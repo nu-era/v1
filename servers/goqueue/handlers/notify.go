@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/akavel/polyclip-go"
 	"github.com/streadway/amqp"
+	"strconv"
+	"strings"
 )
 
 // map for shaking intensity based on MMI
@@ -55,14 +57,25 @@ func (ctx *QueueContext) Routine() {
 	- listen for data coming in from ShakeAlert API
 		- publish data to receive queue?
 			- read off of receive queue
+			- make contour based on polygon data from API
 			- filter devices based on location relative to MMI 4 polygon if present
 			- publish message to queue
-	-
 	*/
 }
 
-// makePolygon takes in lat/longitude point data from the ShakeAlert API
-// and generates/returns a polyclip polygon object
-func makePolygon(data interface{}) *polyclip.Polygon {
-	return nil
+// makeContour takes in lat/longitude point data from the ShakeAlert API
+// and generates/returns a polyclip contour object
+func makeContour(data string) *polyclip.Contour {
+	points := strings.Split(data, " ")
+	contour := &polyclip.Contour{}
+	for _, p := range points {
+		coords := strings.Split(p, ",")
+		x, _ := strconv.ParseFloat(coords[0], 64)
+		y, _ := strconv.ParseFloat(coords[1], 64)
+		contour.Add(polyclip.Point{
+			X: x,
+			Y: y,
+		})
+	}
+	return contour
 }
