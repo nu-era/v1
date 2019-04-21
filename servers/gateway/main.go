@@ -92,8 +92,9 @@ func main() {
 	mux.HandleFunc("/time", handlers.TimeHandler)
 	mux.HandleFunc("/device", hc.DevicesHandler)
 	mux.Handle("/ws", wcProxy)
+	wrappedMux := handlers.NewCORS(mux)
 	fmt.Printf("server is listening at https://%s\n", addr)
-	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, mux))
+	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, wrappedMux))
 }
 
 // Director handles the transport of requests to proper endpoints
@@ -152,8 +153,12 @@ func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 		}
 		r.Header.Add("X-Forwarded-Host", r.Host)
 		if strings.HasPrefix(target.String(), "wc") {
+			fmt.Println(r)
 			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 			r.URL.Scheme = "https"
+			r.Header.Set("X-Connection", "Upgrade")
+			r.Header.Set("X-Upgrade", "websocket")
+			r.Header.Set("X-Sec-Websocket-Key", r.Header.Get("Sec-Websocket-Key"))
 		} else {
 			r.URL.Scheme = "http"
 		}

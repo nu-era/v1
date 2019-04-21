@@ -19,12 +19,12 @@ export WCADDRS="wc:8000"
 echo "Connecting to server..."
 ssh ec2-user@ec2-34-212-199-173.us-west-2.compute.amazonaws.com 'bash -s' << EOF
 #Cleanup existing docker images
-#docker system prune -f
-#docker volume prune -f
+printf 'y' | docker system prune -a --volumes;
 
 # Create docker network
 docker network create apinet;
 
+docker pull bfranzen1/notify
 docker pull bfranzen1/newera-gateway
 #docker pull newera-mysql
 docker rm -f gateway
@@ -64,17 +64,7 @@ redis;
 #-e MYSQL_DATABASE=mysql \
 #newera/mysql;
 
-sleep 5s;
-# Run Websocket Microservice instance
-docker pull bfranzen1/notify
-docker run -d \
---network apinet \
---name wc \
--v /etc/letsencrypt:/etc/letsencrypt:ro \
--e RABBITMQ=$RABBITMQ \
--e TLSCERT=$TLSCERT \
--e TLSKEY=$TLSKEY \
-bfranzen1/notify;
+sleep 10s; # need to wait for rmq for some reason
 
 # Run web server
 docker run -d \
@@ -89,8 +79,18 @@ docker run -d \
 -e MONGO_ADDR=$MONGOADDR \
 -e WCADDRS=$WCADDRS \
 bfranzen1/newera-gateway;
-
 #-e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+
+# Run Websocket Microservice instance
+docker run -d \
+--network apinet \
+--name wc \
+-v /etc/letsencrypt:/etc/letsencrypt:ro \
+-e RABBITMQ=$RABBITMQ \
+-e TLSCERT=$TLSCERT \
+-e TLSKEY=$TLSKEY \
+bfranzen1/notify;
+
 
 exit
 

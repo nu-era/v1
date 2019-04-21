@@ -102,7 +102,7 @@ type Message struct {
 	ChannelID int64                  `json:"channelID,omitempty"`
 	Message   map[string]interface{} `json:"message,omitempty"`
 	MessageID int64                  `json:"messageID,omitempty"`
-	deviceIDs []int64                `json:"deviceIDs,omitempty"`
+	DeviceIDs []int64                `json:"deviceIDs,omitempty"`
 }
 
 // upgrader is a variable that stores websocket information and verifies
@@ -124,6 +124,7 @@ var upgrader = websocket.Upgrader{
 // if the device is valid (request comes from proper host, device exists) upgrade is performed
 // and connection is stored for duration of client session
 func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *http.Request) {
+	r = addWebsocketHeaders(r)
 	fmt.Println("UPGRADING TO WEBSOCKET")
 	if r.Header.Get("X-Device") == "" {
 		http.Error(w, "Unauthorized Access", 401)
@@ -135,44 +136,45 @@ func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *ht
 		http.Error(w, "Bad Request", 400)
 		return
 	}
-	fmt.Println(dest)
 
 	// handle the websocket handshake
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Printf("ERROR OPENING CONNECTION: ", err)
+		fmt.Printf("ERROR OPENING CONNECTION: %v", err)
 		http.Error(w, "Failed to open websocket connection", 401)
 		return
 	}
 
 	fmt.Println("CONNECTION UPGRADED")
 	// Insert our connection onto our datastructure for ongoing usage
-	hc.Sockets.InsertConnection(dest["ID"].(bson.ObjectId), conn)
+	hc.Sockets.InsertConnection(bson.ObjectIdHex(dest["ID"].(string)), conn)
 	// Invoke a goroutine for handling control messages from this connection
 	fmt.Println("CONNECTION INSERTED")
-
+	fmt.Println(r)
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()
 		defer hc.Sockets.RemoveConnection(deviceID)
 
 		for {
 			messageType, p, err := conn.ReadMessage()
-			var j map[string]interface{}
-			if err := json.Unmarshal(p, &j); err != nil {
-				fmt.Println("error unmarshaling json")
+			if len(p) > 0 {
+				var j map[string]interface{}
+				if err := json.Unmarshal(p, &j); err != nil {
+					fmt.Printf("error unmarshaling json: %v", err)
+				}
 			}
 
 			if messageType == CloseMessage {
 				fmt.Println("Close message received...")
 				break
 			} else if err != nil {
-				fmt.Println("error connecting, closing...")
+				fmt.Printf("error connecting: %v, closing...", err)
 				break
 			}
 			// ignore ping and pong messages
 		}
 
-	})(conn, dest["ID"].(bson.ObjectId))
+	})(conn, bson.ObjectIdHex(dest["ID"].(string)))
 }
 
 // ConnectQueue connects to the RabbitMQ service at the address defined in the addr variable
@@ -224,4 +226,12 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 		}
 
 	}
+}
+
+func addWebsocketHeaders(r *http.Request) *http.Request {
+	r.Header.Set("Connection", r.Header.Get("X-Connection"))
+	r.Header.Set("Upgrade", r.Header.Get("X-Upgrade"))
+	r.Header.Set("Connection", r.Header.Get("X-Connection"))
+	r.Header.Set("Sec-Websocket-Key", r.Header.Get("X-Sec-Websocket-Key"))
+	return r
 }
