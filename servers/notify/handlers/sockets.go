@@ -7,7 +7,7 @@ import (
 	"github.com/streadway/amqp"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
-	//"strings"
+	"strings"
 	"sync"
 )
 
@@ -74,7 +74,7 @@ func (s *SocketStore) RemoveConnection(id bson.ObjectId) {
 // (if the message is intended for a private channel), or to all of them (if the message
 // is posted on a public channel
 func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, messageType int, data []byte) error {
-	fmt.Println("Number of devices to send to: %d", len(deviceIDs))
+	fmt.Printf("Number of devices to send to: %d", len(deviceIDs))
 	var writeError error
 	if len(deviceIDs) > 0 { // private channel
 		for _, id := range deviceIDs {
@@ -111,12 +111,11 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		// orig := r.Header.Get("Origin")
-		// fmt.Println(orig)
-		// if strings.Contains(orig, "jmatray.me") || strings.Contains(orig, "bfranzen.me") {
-		// 	return true
-		// }
-		return true
+		orig := r.Header.Get("Origin")
+		if strings.Contains(orig, "bfranzen.me") {
+			return true
+		}
+		return false
 	},
 }
 
@@ -140,6 +139,8 @@ func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *ht
 	// handle the websocket handshake
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		fmt.Println("ERROR: vvv")
+		fmt.Println(err)
 		fmt.Printf("ERROR OPENING CONNECTION: %v", err)
 		http.Error(w, "Failed to open websocket connection", 401)
 		return
@@ -231,7 +232,6 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 func addWebsocketHeaders(r *http.Request) *http.Request {
 	r.Header.Set("Connection", r.Header.Get("X-Connection"))
 	r.Header.Set("Upgrade", r.Header.Get("X-Upgrade"))
-	r.Header.Set("Connection", r.Header.Get("X-Connection"))
 	r.Header.Set("Sec-Websocket-Key", r.Header.Get("X-Sec-Websocket-Key"))
 	return r
 }

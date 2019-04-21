@@ -18,7 +18,7 @@ export WCADDRS="wc:8000"
 
 echo "Connecting to server..."
 ssh ec2-user@ec2-34-212-199-173.us-west-2.compute.amazonaws.com 'bash -s' << EOF
-#Cleanup existing docker images
+#Clean up existing docker images
 printf 'y' | docker system prune -a --volumes;
 
 # Create docker network

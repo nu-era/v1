@@ -41,6 +41,7 @@ func main() {
 	go hc.Sockets.Read(events)
 
 	mux := http.NewServeMux()
+	//wrappedMux := handlers.NewWsMiddleware(mux)
 	mux.HandleFunc("/ws", hc.WebSocketConnectionHandler)
 
 	log.Printf("https Server is listening on port %s", addr)

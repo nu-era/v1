@@ -157,7 +157,7 @@ func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 			r.URL.Scheme = "https"
 			r.Header.Set("X-Connection", "Upgrade")
-			r.Header.Set("X-Upgrade", "websocket")
+			r.Header.Set("X-Upgrade", "Websocket")
 			r.Header.Set("X-Sec-Websocket-Key", r.Header.Get("Sec-Websocket-Key"))
 		} else {
 			r.URL.Scheme = "http"
