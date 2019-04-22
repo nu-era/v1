@@ -1,7 +1,7 @@
 # new-ERA
 
-New era is a reliable Earthquake Emergency Alert System that requires only a simple device to deliver lightning fast warnings. Even when your cellphone is down, new era is there to protect you.
-
+New ERA is a reliable Earthquake Emergency Alert System that requires only a simple device or connection to deliver lightning fast warnings. New ERA is also evaluating the current technologies in time sensitive emergency notification broadcasting by providing transparent metrics between each component.  
+ 
 
 ## Team Members
 
