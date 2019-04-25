@@ -36,6 +36,11 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if _, err := ctx.deviceStore.GetByName(device.Name); err != nil {
+		http.Error(w, fmt.Sprintf("device name already exists"), http.StatusBadRequest)
+		return
+	}
+
 	device, err = ctx.deviceStore.Insert(device)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error adding device: %v", err), http.StatusInternalServerError)

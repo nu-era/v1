@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	//"net/http/httputil"
+	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -84,10 +84,10 @@ func main() {
 	ws := handlers.NewSocketStore()
 	hc := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, ws)
 	// // addresses of websocket microservice instances
-	//wc := strings.Split(os.Getenv("WCADDRS"), ",")
+	goQ := strings.Split(os.Getenv("GOQ"), ",")
 
 	// // proxy for websocket microservice
-	//wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, hc)}
+	goQProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(goQ, hc)}
 
 	// connect to RabbitMQ
 	events, err := hc.Sockets.ConnectQueue(rmq)
@@ -107,6 +107,7 @@ func main() {
 	mux.HandleFunc("/device-info/", hc.SpecificDeviceHandler)
 	mux.HandleFunc("/connect", hc.SessionsHandler)
 	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
+	mux.Handle("/test", goQProxy)
 	wrappedMux := handlers.NewCORS(mux)
 	fmt.Printf("server is listening at https://%s\n", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, wrappedMux))
