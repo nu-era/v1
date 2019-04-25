@@ -76,7 +76,7 @@ func main() {
 	// defer db.Close()
 
 	sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
-	deviceStore := devices.NewMongoStore(mongoSess)
+	deviceStore := devices.NewMongoStore(mongoSess, "db", "devices")
 	conn := handlers.NewConnections()
 	hc := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
 
@@ -88,7 +88,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
-	mux.HandleFunc("/device", hc.DevicesHandler)
+	mux.HandleFunc("/setup", hc.DevicesHandler)
+	mux.HandleFunc("/device-info", hc.SpecificDeviceHandler)
+	mux.HandleFunc("/connect", hc.SessionsHandler)
+	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
 
 	fmt.Printf("server is listening at https://%s\n", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, mux))

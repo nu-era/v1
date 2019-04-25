@@ -99,7 +99,7 @@ func (nu *NewDevice) ToDevice() (*Device, error) {
 		Name:   nu.Name,
 		Lat:    nu.Lat,
 		Long:   nu.Long,
-		Status: "up",
+		Status: "down",
 	}
 	// hash and set passHash field of device
 	if err := dev.SetPassword(nu.Password); err != nil {
