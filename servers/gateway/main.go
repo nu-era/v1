@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
 	//"net/http/httputil"
 	"net/url"
 	"os"
@@ -103,7 +104,7 @@ func main() {
 	mux.HandleFunc("/device", hc.DevicesHandler)
 	mux.HandleFunc("/ws", hc.WebSocketConnectionHandler)
 	mux.HandleFunc("/setup", hc.DevicesHandler)
-	mux.HandleFunc("/device-info", hc.SpecificDeviceHandler)
+	mux.HandleFunc("/device-info/", hc.SpecificDeviceHandler)
 	mux.HandleFunc("/connect", hc.SessionsHandler)
 	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
 	wrappedMux := handlers.NewCORS(mux)

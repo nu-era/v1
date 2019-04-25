@@ -74,6 +74,7 @@ func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.
 		segment := path.Base(r.URL.Path)
 		if segment != "me" && segment != deviceID.Hex() {
 			http.Error(w, "unathorized", http.StatusUnauthorized)
+			return
 		}
 		if r.Header.Get(headerContentType) != contentTypeJSON {
 			http.Error(w, "content type must be application/json", http.StatusUnsupportedMediaType)
