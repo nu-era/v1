@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/New-Era/servers/goqueue/handlers"
 	"github.com/streadway/amqp"
-	mgo "gopkg.in/mgo.v2"
+	//mgo "gopkg.in/mgo.v2"
 	"log"
 	"net/http"
 	"os"
@@ -23,14 +23,14 @@ func main() {
 		log.Fatalf("error connecting to queue, %v", err)
 	}
 
-	mongoAddr := os.Getenv("MONGO_ADDR")
-	mongoSess, err := mgo.Dial(mongoAddr)
-	if err != nil {
-		log.Fatalf("error dialing mongo: %v", err)
-	}
+	// mongoAddr := os.Getenv("MONGO_ADDR")
+	// mongoSess, err := mgo.Dial(mongoAddr)
+	// if err != nil {
+	// 	log.Fatalf("error dialing mongo: %v", err)
+	// }
 
 	hc := handlers.QueueContext{
-		MongoDB: mongoSess,
+		//MongoDB: mongoSess,
 		Channel: ch,
 	}
 

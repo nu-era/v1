@@ -31,7 +31,7 @@ docker rm -f gateway
 #docker rm -f mysql
 docker rm -f redisserver
 docker rm -f mgo
-docker rm -f wc
+docker rm -f goq
 docker rm -f rmq
 
 
