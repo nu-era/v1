@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/akavel/polyclip-go"
 	"github.com/streadway/amqp"
+	"gopkg.in/mgo.v2/bson"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -18,6 +20,16 @@ var shaking = map[int]string{
 	8:  "Severe",
 	9:  "Violent",
 	10: "Extreme",
+}
+
+// Alert is a struct that holds
+// information to send to devices
+type Alert struct {
+	Location  string          `json:"location"`
+	Magnitude string          `json:"magnitude,omitempty"`
+	Intensity string          `json:"intensity,omitempty"`
+	Time      string          `json:"time,omitempty"`
+	DeviceIDs []bson.ObjectId `json:"deviceIDs,omitempty"`
 }
 
 // PublishData takes the input data and publishes it to rabbitmq
@@ -78,4 +90,14 @@ func makeContour(data string) *polyclip.Contour {
 		})
 	}
 	return contour
+}
+
+// TestHandler simulates a message being pushed onto the RabbitMQ queue
+func (ctx *QueueContext) TestHandler(w http.ResponseWriter, r *http.Request) {
+	data := Alert{
+		Magnitude: "5.5",
+		Intensity: "4",
+		Time:      "60",
+	}
+	ctx.PublishData(data, NewEra)
 }

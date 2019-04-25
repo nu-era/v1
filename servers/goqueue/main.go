@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"github.com/New-Era/servers/goqueue/handlers"
 	"github.com/streadway/amqp"
@@ -15,7 +15,7 @@ import (
 func main() {
 	addr := os.Getenv("ADDR")
 	if len(addr) == 0 {
-		addr = ":8080"
+		addr = ":8000"
 	}
 
 	ch, err := connectQueue(os.Getenv("RABBITMQ"))
@@ -35,8 +35,10 @@ func main() {
 	}
 
 	go hc.Routine()
+	mux := http.NewServeMux()
+	mux.HandleFunc("/test", hc.TestHandler)
 	log.Printf("Server is listening on port %s", addr)
-	log.Fatal(http.ListenAndServe(addr, nil))
+	log.Fatal(http.ListenAndServe(addr, mux))
 }
 
 // connectQueue connects to the RabbitMQ service at the address defined in the addr variable

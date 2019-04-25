@@ -7,8 +7,8 @@ import (
 
 const (
 	// name of rabbitmq queue to use for services
-	ShakeAlert = "receive"
-	NewEra     = "send"
+	ShakeAlert = "api"     // comes from shakealert
+	NewEra     = "devices" // want to go to devices
 )
 
 // QueueContext is a receiver that stores

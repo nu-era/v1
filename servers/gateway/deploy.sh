@@ -5,8 +5,8 @@ docker push bfranzen1/newera-gateway
 #docker push newera/mysql  
 
 # build websocket microservice container
-(cd ../notify/ ; sh build.sh)
-docker push bfranzen1/notify
+(cd ../goqueue/ ; sh build.sh)
+docker push bfranzen1/goqueue
 
 export TLSCERT=/etc/letsencrypt/live/api.bfranzen.me/fullchain.pem
 export TLSKEY=/etc/letsencrypt/live/api.bfranzen.me/privkey.pem
@@ -24,7 +24,7 @@ printf 'y' | docker system prune -a --volumes;
 # Create docker network
 docker network create apinet;
 
-docker pull bfranzen1/notify
+docker pull bfranzen1/goqueue
 docker pull bfranzen1/newera-gateway
 #docker pull newera-mysql
 docker rm -f gateway
@@ -82,14 +82,12 @@ bfranzen1/newera-gateway;
 #-e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
 
 # Run Websocket Microservice instance
-# docker run -d \
-# --network apinet \
-# --name wc \
-# -v /etc/letsencrypt:/etc/letsencrypt:ro \
-# -e RABBITMQ=$RABBITMQ \
-# -e TLSCERT=$TLSCERT \
-# -e TLSKEY=$TLSKEY \
-# bfranzen1/notify;
+docker run -d \
+--network apinet \
+--name goq \
+-e MONGO_ADDR=$MONGO_ADDR \
+-e RABBITMQ=$RABBITMQ \
+bfranzen1/goqueue;
 
 
 exit

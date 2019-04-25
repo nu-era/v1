@@ -50,7 +50,7 @@ const (
 	PongMessage = 10
 
 	// name of rabbitmq queue to use for notifications
-	qName = "services"
+	qName = "devices"
 )
 
 // InsertConnection is a Thread-safe method for inserting a connection
