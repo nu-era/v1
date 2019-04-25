@@ -3,11 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/New-Era/servers/gateway/handlers"
-	"github.com/New-Era/servers/gateway/models/devices"
-	"github.com/New-Era/servers/gateway/sessions"
-	"github.com/go-redis/redis"
-	mgo "gopkg.in/mgo.v2"
 	"log"
 	"net/http"
 	//"net/http/httputil"
@@ -15,6 +10,12 @@ import (
 	"os"
 	"sync/atomic"
 	"time"
+
+	"github.com/New-Era/servers/gateway/handlers"
+	"github.com/New-Era/servers/gateway/models/devices"
+	"github.com/New-Era/servers/gateway/sessions"
+	"github.com/go-redis/redis"
+	mgo "gopkg.in/mgo.v2"
 )
 
 // main entry point for the server
@@ -78,7 +79,7 @@ func main() {
 	// defer db.Close()
 
 	sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
-	deviceStore := devices.NewMongoStore(mongoSess)
+	deviceStore := devices.NewMongoStore(mongoSess, "db", "devices")
 	ws := handlers.NewSocketStore()
 	hc := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, ws)
 	// // addresses of websocket microservice instances
@@ -101,6 +102,10 @@ func main() {
 	mux.HandleFunc("/time", handlers.TimeHandler)
 	mux.HandleFunc("/device", hc.DevicesHandler)
 	mux.HandleFunc("/ws", hc.WebSocketConnectionHandler)
+	mux.HandleFunc("/setup", hc.DevicesHandler)
+	mux.HandleFunc("/device-info", hc.SpecificDeviceHandler)
+	mux.HandleFunc("/connect", hc.SessionsHandler)
+	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
 	wrappedMux := handlers.NewCORS(mux)
 	fmt.Printf("server is listening at https://%s\n", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, wrappedMux))

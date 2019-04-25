@@ -52,12 +52,15 @@ type NewDevice struct {
 
 //Updates represents allowed updates to a user profile
 type Updates struct {
-	Name   string  `json:"Name"`
-	Lat    float64 `json:"latitude"`
-	Long   float64 `json:"longitude"`
-	Email  string  `json:"email"`
-	Phone  string  `json:"phone"`
-	Status string  `json:"status"`
+	Name         string  `json:"Name"`
+	Lat          float64 `json:"latitude"`
+	Long         float64 `json:"longitude"`
+	Email        string  `json:"email"`
+	Phone        string  `json:"phone"`
+	Status       string  `json:"status"`
+	OldPassword  string  `json:"oldPassword"`
+	Password     string  `json:"password"`
+	PasswordConf string  `json:"passwordConf"`
 }
 
 //Validate validates the new user and returns an error if
@@ -79,7 +82,7 @@ func (nu *NewDevice) Validate() error {
 		return fmt.Errorf("Email must be provided, got %s", nu.Email)
 	}
 	if nu.Lat == 0 || nu.Long == 0 {
-		return fmt.Errorf("Location must be provided, got lat:%b, long:%b", nu.Lat, nu.Long)
+		return fmt.Errorf("Location must be provided, got lat:%f, long:%f", nu.Lat, nu.Long)
 	}
 	//TODO: Restrict to only washington state area
 
@@ -99,7 +102,7 @@ func (nu *NewDevice) ToDevice() (*Device, error) {
 		Name:   nu.Name,
 		Lat:    nu.Lat,
 		Long:   nu.Long,
-		Status: "up",
+		Status: "down",
 	}
 	// hash and set passHash field of device
 	if err := dev.SetPassword(nu.Password); err != nil {
@@ -154,6 +157,21 @@ func (d *Device) ApplyUpdates(updates *Updates) error {
 	}
 	if len(updates.Phone) > 10 && len(updates.Phone) < 12 {
 		d.Phone = updates.Phone
+	} else {
+		return errors.New("Not a valid phone number")
+	}
+	if len(updates.OldPassword) != 0 {
+		if err := d.Authenticate(updates.OldPassword); err != nil {
+			return err
+		}
+		if len(updates.Password) < 6 {
+			return errors.New("New password must be at least 6 characters")
+		} else if len(updates.Password) != 0 && updates.Password != updates.PasswordConf {
+			return errors.New("Passwords do not match")
+			if err := d.SetPassword(updates.Password); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }

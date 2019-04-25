@@ -16,15 +16,22 @@ var invalidQuery = errors.New("Invalid query")
 // insert methods below
 
 type MongoStore struct {
-	ses *mgo.Session
+	ses     *mgo.Session
+	dboname string
+	colname string
+	col     *mgo.Collection
 }
 
-func NewMongoStore(ses *mgo.Session) *MongoStore {
+func NewMongoStore(ses *mgo.Session, db string, collection string) *MongoStore {
+	fmt.Println(ses)
 	if ses == nil {
 		return nil
 	}
 	return &MongoStore{
-		ses: ses,
+		ses:     ses,
+		dboname: db,
+		colname: collection,
+		col:     ses.DB(db).C(collection),
 	}
 }
 
