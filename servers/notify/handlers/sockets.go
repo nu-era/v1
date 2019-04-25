@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
+	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"strings"
 	"sync"
@@ -13,7 +14,7 @@ import (
 // SocketStore contains client connection information
 // and a queue channel for sending notifications
 type SocketStore struct {
-	Connections map[int64]*websocket.Conn
+	Connections map[bson.ObjectId]*websocket.Conn
 	lock        sync.Mutex
 	Chan        *amqp.Channel
 }
@@ -22,7 +23,7 @@ type SocketStore struct {
 // a websocket, a mutex lock for concurrent use and a queue channel for real time
 // notifications
 func NewSocketStore() *SocketStore {
-	return &SocketStore{Connections: map[int64]*websocket.Conn{}}
+	return &SocketStore{Connections: map[bson.ObjectId]*websocket.Conn{}}
 }
 
 // Control messages for websocket
@@ -52,7 +53,7 @@ const (
 )
 
 // InsertConnection is a Thread-safe method for inserting a connection
-func (s *SocketStore) InsertConnection(id int64, conn *websocket.Conn) {
+func (s *SocketStore) InsertConnection(id bson.ObjectId, conn *websocket.Conn) {
 	s.lock.Lock()
 	// insert socket connection
 	s.Connections[id] = conn
@@ -60,7 +61,7 @@ func (s *SocketStore) InsertConnection(id int64, conn *websocket.Conn) {
 }
 
 // RemoveConnection is a Thread-safe method for removing a connection
-func (s *SocketStore) RemoveConnection(id int64) {
+func (s *SocketStore) RemoveConnection(id bson.ObjectId) {
 	s.lock.Lock()
 	_, ok := s.Connections[id]
 	if ok {
@@ -72,8 +73,8 @@ func (s *SocketStore) RemoveConnection(id int64) {
 // WriteToValidConnections sends messages to a subset of connections
 // (if the message is intended for a private channel), or to all of them (if the message
 // is posted on a public channel
-func (s *SocketStore) WriteToValidConnections(deviceIDs []int64, messageType int, data []byte) error {
-	fmt.Println("Number of devices to send to: %d", len(deviceIDs))
+func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, messageType int, data []byte) error {
+	fmt.Printf("Number of devices to send to: %d", len(deviceIDs))
 	var writeError error
 	if len(deviceIDs) > 0 { // private channel
 		for _, id := range deviceIDs {
@@ -101,7 +102,7 @@ type Message struct {
 	ChannelID int64                  `json:"channelID,omitempty"`
 	Message   map[string]interface{} `json:"message,omitempty"`
 	MessageID int64                  `json:"messageID,omitempty"`
-	deviceIDs []int64                `json:"deviceIDs,omitempty"`
+	DeviceIDs []int64                `json:"deviceIDs,omitempty"`
 }
 
 // upgrader is a variable that stores websocket information and verifies
@@ -111,7 +112,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		orig := r.Header.Get("Origin")
-		if strings.Contains(orig, "jmatray.me") || strings.Contains(orig, "bfranzen.me") {
+		if strings.Contains(orig, "bfranzen.me") {
 			return true
 		}
 		return false
@@ -122,53 +123,59 @@ var upgrader = websocket.Upgrader{
 // if the device is valid (request comes from proper host, device exists) upgrade is performed
 // and connection is stored for duration of client session
 func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *http.Request) {
+	r = addWebsocketHeaders(r)
 	fmt.Println("UPGRADING TO WEBSOCKET")
 	if r.Header.Get("X-Device") == "" {
 		http.Error(w, "Unauthorized Access", 401)
 		return
 	}
-	fmt.Println(r.Header.Get("X-Device"))
 	var dest map[string]interface{}
 	if err := json.Unmarshal([]byte(r.Header.Get("X-Device")), &dest); err != nil {
 		fmt.Printf("error getting message body, %v", err)
 		http.Error(w, "Bad Request", 400)
 		return
 	}
-	fmt.Println(dest)
-	fmt.Println(dest["id"])
 
 	// handle the websocket handshake
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		fmt.Println("ERROR: vvv")
+		fmt.Println(err)
+		fmt.Printf("ERROR OPENING CONNECTION: %v", err)
 		http.Error(w, "Failed to open websocket connection", 401)
 		return
 	}
 
+	fmt.Println("CONNECTION UPGRADED")
 	// Insert our connection onto our datastructure for ongoing usage
-	hc.Sockets.InsertConnection(dest["id"].(int64), conn)
+	hc.Sockets.InsertConnection(bson.ObjectIdHex(dest["ID"].(string)), conn)
 	// Invoke a goroutine for handling control messages from this connection
-	go (func(conn *websocket.Conn, deviceID int64) {
+	fmt.Println("CONNECTION INSERTED")
+	fmt.Println(r)
+	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()
 		defer hc.Sockets.RemoveConnection(deviceID)
 
 		for {
 			messageType, p, err := conn.ReadMessage()
-			var j map[string]interface{}
-			if err := json.Unmarshal(p, &j); err != nil {
-				fmt.Println("error unmarshaling json")
+			if len(p) > 0 {
+				var j map[string]interface{}
+				if err := json.Unmarshal(p, &j); err != nil {
+					fmt.Printf("error unmarshaling json: %v", err)
+				}
 			}
 
 			if messageType == CloseMessage {
 				fmt.Println("Close message received...")
 				break
 			} else if err != nil {
-				fmt.Println("error connecting, closing...")
+				fmt.Printf("error connecting: %v, closing...", err)
 				break
 			}
 			// ignore ping and pong messages
 		}
 
-	})(conn, dest["id"].(int64))
+	})(conn, bson.ObjectIdHex(dest["ID"].(string)))
 }
 
 // ConnectQueue connects to the RabbitMQ service at the address defined in the addr variable
@@ -210,14 +217,21 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 			break
 		}
 		if event["deviceIDs"] != nil {
-			ids := make([]int64, len(event["deviceIDs"].([]interface{})))
+			ids := make([]bson.ObjectId, len(event["deviceIDs"].([]interface{})))
 			for i, v := range event["deviceIDs"].([]interface{}) {
-				ids[i] = int64(v.(float64))
+				ids[i] = v.(bson.ObjectId)
 			}
 			s.WriteToValidConnections(ids, TextMessage, e.Body)
 		} else {
-			s.WriteToValidConnections([]int64{}, TextMessage, e.Body)
+			s.WriteToValidConnections([]bson.ObjectId{}, TextMessage, e.Body)
 		}
 
 	}
+}
+
+func addWebsocketHeaders(r *http.Request) *http.Request {
+	r.Header.Set("Connection", r.Header.Get("X-Connection"))
+	r.Header.Set("Upgrade", r.Header.Get("X-Upgrade"))
+	r.Header.Set("Sec-Websocket-Key", r.Header.Get("X-Sec-Websocket-Key"))
+	return r
 }

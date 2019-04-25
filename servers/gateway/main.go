@@ -1,12 +1,15 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -81,10 +84,10 @@ func main() {
 	hc := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
 
 	// addresses of websocket microservice instances
-	//wc := strings.Split(os.Getenv("WCADDRS"), ",")
+	wc := strings.Split(os.Getenv("WCADDRS"), ",")
 
 	// proxy for websocket microservice
-	//wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, hc)}
+	wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, hc)}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
@@ -92,9 +95,10 @@ func main() {
 	mux.HandleFunc("/device-info", hc.SpecificDeviceHandler)
 	mux.HandleFunc("/connect", hc.SessionsHandler)
 	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
-
+	mux.Handle("/ws", wcProxy)
+	wrappedMux := handlers.NewCORS(mux)
 	fmt.Printf("server is listening at https://%s\n", addr)
-	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, mux))
+	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, wrappedMux))
 }
 
 // Director handles the transport of requests to proper endpoints
@@ -125,7 +129,12 @@ func CustomDirectorRR(targets []string, hc *handlers.HandlerContext) Director {
 			r.Header.Set("X-Device", string(j))
 		}
 		r.Header.Add("X-Forwarded-Host", r.Host)
-		r.URL.Scheme = "http"
+		if strings.HasPrefix(dest.String(), "wc") {
+			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			r.URL.Scheme = "https"
+		} else {
+			r.URL.Scheme = "http"
+		}
 		r.URL.Host = dest.String()
 		r.Host = dest.String()
 	}
@@ -147,7 +156,16 @@ func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 			r.Header.Set("X-Device", string(j))
 		}
 		r.Header.Add("X-Forwarded-Host", r.Host)
-		r.URL.Scheme = "http"
+		if strings.HasPrefix(target.String(), "wc") {
+			fmt.Println(r)
+			http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			r.URL.Scheme = "https"
+			r.Header.Set("X-Connection", "Upgrade")
+			r.Header.Set("X-Upgrade", "Websocket")
+			r.Header.Set("X-Sec-Websocket-Key", r.Header.Get("Sec-Websocket-Key"))
+		} else {
+			r.URL.Scheme = "http"
+		}
 		r.URL.Host = target.String()
 		r.Host = target.String()
 	}
