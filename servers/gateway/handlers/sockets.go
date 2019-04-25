@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/New-Era/servers/gateway/sessions"
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
 	"gopkg.in/mgo.v2/bson"
@@ -122,34 +123,22 @@ var upgrader = websocket.Upgrader{
 // WebSocketConnectionHandler handles when the client requests an upgrade to a websocket
 // if the device is valid (request comes from proper host, device exists) upgrade is performed
 // and connection is stored for duration of client session
-func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r)
-	r = addWebsocketHeaders(r)
-	fmt.Println("UPGRADING TO WEBSOCKET")
-	if r.Header.Get("X-Device") == "" {
-		http.Error(w, "Unauthorized Access", 401)
-		return
-	}
-	var dest map[string]interface{}
-	if err := json.Unmarshal([]byte(r.Header.Get("X-Device")), &dest); err != nil {
-		fmt.Printf("error getting message body, %v", err)
-		http.Error(w, "Bad Request", 400)
+func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *http.Request) {
+	var sess SessionState
+	if _, err := sessions.GetState(r, hc.SigningKey, hc.SessStore, &sess); err != nil {
+		http.Error(w, "Not authorized to access resource", 401)
 		return
 	}
 
 	// handle the websocket handshake
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println("ERROR: vvv")
-		fmt.Println(err)
-		fmt.Printf("ERROR OPENING CONNECTION: %v", err)
 		http.Error(w, "Failed to open websocket connection", 401)
 		return
 	}
 
-	fmt.Println("CONNECTION UPGRADED")
 	// Insert our connection onto our datastructure for ongoing usage
-	hc.Sockets.InsertConnection(bson.ObjectIdHex(dest["ID"].(string)), conn)
+	hc.Sockets.InsertConnection(sess.Device.ID, conn)
 	// Invoke a goroutine for handling control messages from this connection
 	fmt.Println("CONNECTION INSERTED")
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
@@ -158,6 +147,9 @@ func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *ht
 
 		for {
 			messageType, p, err := conn.ReadMessage()
+			fmt.Println("DATA SENT: vvv")
+			fmt.Println(p)
+			fmt.Println("----------------------")
 			fmt.Println(err)
 			if len(p) > 0 {
 				var j map[string]interface{}
@@ -171,12 +163,12 @@ func (hc *NotifyContext) WebSocketConnectionHandler(w http.ResponseWriter, r *ht
 				break
 			} else if err != nil {
 				fmt.Printf("error connecting: %v, closing...", err)
-				break
+				//break
 			}
 			// ignore ping and pong messages
 		}
 
-	})(conn, bson.ObjectIdHex(dest["ID"].(string)))
+	})(conn, sess.Device.ID)
 }
 
 // ConnectQueue connects to the RabbitMQ service at the address defined in the addr variable
@@ -228,11 +220,4 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 		}
 
 	}
-}
-
-func addWebsocketHeaders(r *http.Request) *http.Request {
-	r.Header.Set("Connection", r.Header.Get("X-Connection"))
-	r.Header.Set("Upgrade", r.Header.Get("X-Upgrade"))
-	r.Header.Set("Sec-Websocket-Key", r.Header.Get("X-Sec-Websocket-Key"))
-	return r
 }

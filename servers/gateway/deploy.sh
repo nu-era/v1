@@ -14,7 +14,7 @@ export REDISADDR="redisserver:6379"
 export MONGOADDR="mgo:27017"
 export SESSIONKEY="shakealert"
 export RABBITMQ="rmq:5672"
-export WCADDRS="wc:8000"
+#export WCADDRS="wc:8000"
 
 echo "Connecting to server..."
 ssh ec2-user@ec2-34-212-199-173.us-west-2.compute.amazonaws.com 'bash -s' << EOF
@@ -77,19 +77,19 @@ docker run -d \
 -e TLSKEY=$TLSKEY \
 -e REDISADDR=$REDISADDR \
 -e MONGO_ADDR=$MONGOADDR \
--e WCADDRS=$WCADDRS \
+-e RABBITMQ=$RABBITMQ \
 bfranzen1/newera-gateway;
 #-e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
 
 # Run Websocket Microservice instance
-docker run -d \
---network apinet \
---name wc \
--v /etc/letsencrypt:/etc/letsencrypt:ro \
--e RABBITMQ=$RABBITMQ \
--e TLSCERT=$TLSCERT \
--e TLSKEY=$TLSKEY \
-bfranzen1/notify;
+# docker run -d \
+# --network apinet \
+# --name wc \
+# -v /etc/letsencrypt:/etc/letsencrypt:ro \
+# -e RABBITMQ=$RABBITMQ \
+# -e TLSCERT=$TLSCERT \
+# -e TLSKEY=$TLSKEY \
+# bfranzen1/notify;
 
 
 exit

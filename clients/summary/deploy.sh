@@ -6,7 +6,11 @@ docker login
 docker push bfranzen1/www.bfranzen.me
 
 # pull and run Container from API VM
-ssh ec2-user@www.bfranzen.me "docker rm -f client;
+ssh ec2-user@www.bfranzen.me "
+#Clean up existing docker images
+printf 'y' | docker system prune -a --volumes;
+
+docker rm -f client;
 docker pull bfranzen1/www.bfranzen.me &&
 docker run -d \
 --name client \
