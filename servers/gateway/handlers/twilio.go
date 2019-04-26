@@ -31,7 +31,7 @@ func Send(numberTo string, numberFrom string, msgBody string) error {
 
 	// Make HTTP POST request and return message SID
 	resp, _ := client.Do(req)
-	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+	if (resp.StatusCode >= 200 && resp.StatusCode < 300) {
 		var data map[string]interface{}
 		decoder := json.NewDecoder(resp.Body)
 		err := decoder.Decode(&data)
