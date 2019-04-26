@@ -21,6 +21,6 @@ docker run -d \
 -e TLSKEY=$TLSKEY \
 # -e MESSAGESADDR=$MESSAGESADDR \
 # -e SUMMARYADDR=$SUMMARYADDR \
-# -e SESSIONKEY=$SESSIONKEY \
-ericjwei/gateway
+ -e SESSIONKEY=$SESSIONKEY \
+newera/gateway
 docker system prune -f

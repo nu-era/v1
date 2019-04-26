@@ -1,19 +1,22 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"os"
+	"strings"
+	"sync/atomic"
+	"time"
+
 	"github.com/New-Era/servers/gateway/handlers"
 	"github.com/New-Era/servers/gateway/models/devices"
 	"github.com/New-Era/servers/gateway/sessions"
+	"github.com/go-redis/redis"
 	mgo "gopkg.in/mgo.v2"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
-	"sync/atomic"
-	"time"
 )
 
 // main entry point for the server
@@ -24,9 +27,11 @@ func main() {
 		addr = ":443"
 	}
 
-	sessionKey = os.Getenv("SESSIONKEY")
+	rmq := os.Getenv("RABBITMQ") // address of rabbitmq server
+
+	sessionKey := os.Getenv("SESSIONKEY")
 	if len(sessionKey) == 0 {
-		log.fatal("please set session key")
+		log.Fatal("please set session key")
 	}
 
 	tlscert := os.Getenv("TLSCERT")
@@ -65,32 +70,47 @@ func main() {
 
 	// MYSQL DB CONNECTION
 	// Construct MySql serve
-	dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/mysql",
-		os.Getenv("MYSQL_ROOT_PASSWORD"))
-	db, err := sql.Open("mysql", dsn)
+	// dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/mysql",
+	// 	os.Getenv("MYSQL_ROOT_PASSWORD"))
+	// db, err := sql.Open("mysql", dsn)
+	// if err != nil {
+	// 	fmt.Printf("error opening database: %v\n", err)
+	// 	os.Exit(1)
+	// }
+	// defer db.Close()
+
+	sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
+	deviceStore := devices.NewMongoStore(mongoSess, "db", "devices")
+	ws := handlers.NewSocketStore()
+	hc := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, ws)
+	// // addresses of websocket microservice instances
+	goQ := strings.Split(os.Getenv("GOQ"), ",")
+
+	// // proxy for websocket microservice
+	goQProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(goQ, hc)}
+
+	// connect to RabbitMQ
+	events, err := hc.Sockets.ConnectQueue(rmq)
 	if err != nil {
-		fmt.Printf("error opening database: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Error connecting to RabbitMQ, %v", err)
 	}
-	defer db.Close()
 
-	sessStore = sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
-	deviceStore := devices.NewMongoStore(mongoSess)
-	conn := handlers.NewConnections()
-	handlerCtx := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, conn)
-
-	// addresses of websocket microservice instances
-	wc := strings.Split(os.Getenv("WCADDRS"), ",")
-
-	// proxy for websocket microservice
-	wcProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(wc, &hc)}
+	// start go routine to read/send event/message notifications
+	// to sockets
+	go hc.Sockets.Read(events)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
-	mux.HandleFunc("/device", handlerCtx.DevicesHandler)
-
+	mux.HandleFunc("/device", hc.DevicesHandler)
+	mux.HandleFunc("/ws", hc.WebSocketConnectionHandler)
+	mux.HandleFunc("/setup", hc.DevicesHandler)
+	mux.HandleFunc("/device-info/", hc.SpecificDeviceHandler)
+	mux.HandleFunc("/connect", hc.SessionsHandler)
+	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
+	mux.Handle("/test", goQProxy)
+	wrappedMux := handlers.NewCORS(mux)
 	fmt.Printf("server is listening at https://%s\n", addr)
-	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, mux))
+	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, wrappedMux))
 }
 
 // Director handles the transport of requests to proper endpoints
@@ -111,8 +131,8 @@ func CustomDirectorRR(targets []string, hc *handlers.HandlerContext) Director {
 	return func(r *http.Request) {
 		r.Header.Del("X-Device") // remove any previous user
 		tmp := handlers.SessionState{}
-		_, _ = s.GetState(r, hc.Key, hc.Session, &tmp)
-		if tmp.Device.ID != 0 { // set if user exists
+		_, _ = sessions.GetState(r, hc.SigningKey, hc.SessStore, &tmp)
+		if tmp.Device.ID != "" { // set if user exists
 			j, err := json.Marshal(tmp.Device)
 			if err != nil {
 				fmt.Println(err)
@@ -133,9 +153,9 @@ func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 	return func(r *http.Request) {
 		r.Header.Del("X-Device") // remove any previous user
 		tmp := handlers.SessionState{}
-		_, _ = s.GetState(r, hc.Key, hc.Session, &tmp)
-		if tmp.Device.ID != 0 { // set if user exists
-			j, err := json.Marshal(tmp.User)
+		_, _ = sessions.GetState(r, hc.SigningKey, hc.SessStore, &tmp)
+		if tmp.Device != nil && tmp.Device.ID != "" { // set if user exists
+			j, err := json.Marshal(tmp.Device)
 			if err != nil {
 				fmt.Println(err)
 				return

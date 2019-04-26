@@ -3,75 +3,191 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/New-Era/servers/gateway/models/devices"
 	"net/http"
-	"strings"
+	"path"
+	"time"
+
+	"github.com/New-Era/servers/gateway/models/devices"
+	"github.com/New-Era/servers/gateway/sessions"
 )
 
-// Check request for 'Content-Type' header equal to the passed content type. If
-// not the correct content-type, returns error and writes 415 status response
-// to writer.
-func contentTypeCheck(w http.ResponseWriter, r *http.Request, contentT string) error {
-	contentType := r.Header.Get(headerContentType)
-	typeList := strings.Split(contentType, ",") // Get the first content type
-	if len(typeList) == 0 || typeList[0] != contentT {
-		http.Error(w, "Incorrect Content Type", http.StatusUnsupportedMediaType)
-		return fmt.Errorf("Incorrect Content-Type")
-	}
-	return nil
-}
-
-// Post: registering a new device, create new session with device
-// Get: Create a new session for a registered device
-
+// DevicesHandler handles the creation (POST) of new devices. Primary key is stored using the name
+// of the device. A standard should be observed.
 func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" && r.Method != "GET" {
-		http.Error(w, "method must be Post or Get", http.StatusMethodNotAllowed)
+	if r.Method != "POST" {
+		http.Error(w, "method must be Post", http.StatusMethodNotAllowed)
 		return
 	}
 
-	if r.Method == http.MethodPost {
-		// Check to make sure content-type is application/json
-		err := contentTypeCheck(w, r, contentTypeJSON)
+	if r.Header.Get(headerContentType) != contentTypeJSON {
+		http.Error(w, "content type must be application/json", http.StatusUnsupportedMediaType)
+		return
+	}
+
+	newDevice := &devices.NewDevice{}
+	if err := json.NewDecoder(r.Body).Decode(newDevice); err != nil {
+		http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	device, err := newDevice.ToDevice()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error creating new device: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	if _, err := ctx.deviceStore.GetByName(device.Name); err != nil {
+		http.Error(w, fmt.Sprintf("device name already exists"), http.StatusBadRequest)
+		return
+	}
+
+	device, err = ctx.deviceStore.Insert(device)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error adding device: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	newSession := &SessionState{StartTime: time.Now(), Device: device}
+	if _, err := sessions.BeginSession(ctx.SigningKey, ctx.SessStore, newSession, w); err != nil {
+		http.Error(w, fmt.Sprintf("error creating new session: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	respond(w, device, http.StatusCreated)
+}
+
+// SpecificUserHandler handles request for a specific device, requiring a prexisting sessions.
+// GET returns device info with given device name
+// PATCH updates the device name
+func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.Request) {
+	sessionState := &SessionState{}
+	sessID, err := sessions.GetState(r, ctx.SigningKey, ctx.SessStore, sessionState)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("problem with session %v", err), http.StatusUnauthorized)
+		return
+	}
+	deviceID := sessionState.Device.ID
+	switch r.Method {
+	case "GET":
+		device, err := ctx.deviceStore.GetByID(deviceID)
 		if err != nil {
+			http.Error(w, fmt.Sprintf("device not found: %v", err), http.StatusNotFound)
+			return
+		}
+		respond(w, device, http.StatusOK)
+	case "PATCH":
+		segment := path.Base(r.URL.Path)
+		if segment != "me" && segment != deviceID.Hex() {
+			http.Error(w, "unathorized", http.StatusUnauthorized)
+			return
+		}
+		if r.Header.Get(headerContentType) != contentTypeJSON {
+			http.Error(w, "content type must be application/json", http.StatusUnsupportedMediaType)
 			return
 		}
 
-		newDevice := devices.NewDevice{} // Create an empty NewDevice struct to be filled by request body
-		decoder := json.NewDecoder(r.Body)
-		if err := decoder.Decode(&newDevice); err != nil {
-			http.Error(w, "Request body unable to be decoded to new device", 400)
+		device, err := ctx.deviceStore.GetByID(deviceID)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error getting device: %v", err), http.StatusNotFound)
+		}
+
+		deviceUpdates := &devices.Updates{}
+		if err := json.NewDecoder(r.Body).Decode(deviceUpdates); err != nil {
+			http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
 			return
 		}
 
-		validDevice, err := newDevice.ToDevice() // Turn new device to a Device type
-		if err != nil {
-			http.Error(w, err.Error(), 400)
+		if err = device.ApplyUpdates(deviceUpdates); err != nil {
+			http.Error(w, fmt.Sprintf("error updating device: %v", err), http.StatusBadRequest)
 			return
 		}
 
-		// Insert the new device to db, and get the newly inserted device
-		// with the new database-assigned primary key value
-		validDevice, err = ctx.DeviceStore.Insert(validDevice)
-		if err != nil {
-			http.Error(w, err.Error(), 400)
+		if err = ctx.deviceStore.Update(deviceID, deviceUpdates); err != nil {
+			http.Error(w, fmt.Sprintf("error updating device: %v", err), http.StatusBadRequest)
 			return
 		}
 
-		err = ctx.WebSocketConnectionHandler(w, r, validDevice.ID)
-		if err != nil {
+		sessionState.Device = device
+		if err := ctx.SessStore.Save(sessID, sessionState); err != nil {
+			http.Error(w, fmt.Sprintf("error updating session state: %v", err), http.StatusInternalServerError)
 			return
 		}
-		conn := ctx.WsConnections.Conns[validDevice.ID]
-		go heartbeat(conn)
+		respond(w, device, http.StatusOK)
+	default:
+		http.Error(w, "method must be GET or PATCH", http.StatusMethodNotAllowed)
+		return
+	}
+}
 
-		// Respond to the client with an http.StatusCreated code, and
-		// the json encoded new user profile
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(201)
-		err = json.NewEncoder(w).Encode(validDevice)
-		if err != nil {
-			http.Error(w, err.Error(), 400)
+//SessionsHandler handels requests for the sessions resource. POST allows for logging in with creditials.
+func (ctx *HandlerContext) SessionsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "method must be POST", http.StatusMethodNotAllowed)
+		return
+	}
+	if r.Header.Get(headerContentType) != contentTypeJSON {
+		http.Error(w, "content type must be application/json", http.StatusUnsupportedMediaType)
+		return
+	}
+
+	deviceCredentials := &devices.Credentials{}
+	if err := json.NewDecoder(r.Body).Decode(deviceCredentials); err != nil {
+		http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
+		return
+	}
+	device, err := ctx.deviceStore.GetByName(deviceCredentials.Name)
+	if device == nil { //Set dummy device
+		device = &devices.Device{}
+	}
+	err = device.Authenticate(deviceCredentials.Password)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("invalid credentials"), http.StatusUnauthorized)
+		return
+	}
+	newSession := &SessionState{StartTime: time.Now(), Device: device}
+	if _, err := sessions.BeginSession(ctx.SigningKey, ctx.SessStore, newSession, w); err != nil {
+		http.Error(w, fmt.Sprintf("error creating new session: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// ip := r.RemoteAddr
+	// ips := strings.Split(r.Header.Get(headerXForwarded), ", ")
+	// if len(ips) > 0 {
+	// 	ip = ips[0]
+	// }
+	// if err := ctx.usersStore.Log(user.ID, ip); err != nil {
+	// 	http.Error(w, fmt.Sprintf("error recording ip of user: %v", err), http.StatusBadRequest)
+	// 	return
+	// }
+	respond(w, device, http.StatusCreated)
+}
+
+//SpecificSessionHandler handles requests related to a specific authenticated session
+func (ctx *HandlerContext) SpecificSessionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "DELETE" {
+		http.Error(w, "method must be DELETE", http.StatusMethodNotAllowed)
+		return
+	}
+	if segment := path.Base(r.URL.Path); segment != "mine" {
+		http.Error(w, "unknown path segment", http.StatusForbidden)
+		return
+	}
+	if _, err := sessions.EndSession(r, ctx.SigningKey, ctx.SessStore); err != nil {
+		http.Error(w, fmt.Sprintf("session not found: %v", err), http.StatusBadRequest)
+		return
+	}
+	fmt.Println("signed out")
+	respond(w, nil, http.StatusOK)
+	return
+}
+
+//respond responds with the status, content type of JSON and encoded value
+func respond(w http.ResponseWriter, value interface{}, status int) {
+	w.WriteHeader(status)
+	if value != nil {
+		w.Header().Add(headerContentType, contentTypeJSON)
+		if err := json.NewEncoder(w).Encode(value); err != nil {
+			http.Error(w, fmt.Sprintf("error encoding response value to JSON: %v", err), http.StatusInternalServerError)
 			return
 		}
 	}

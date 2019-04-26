@@ -16,15 +16,22 @@ var invalidQuery = errors.New("Invalid query")
 // insert methods below
 
 type MongoStore struct {
-	ses *mgo.Session
+	ses     *mgo.Session
+	dboname string
+	colname string
+	col     *mgo.Collection
 }
 
-func NewMongoStore(ses *mgo.Session) *MongoStore {
+func NewMongoStore(ses *mgo.Session, db string, collection string) *MongoStore {
+	fmt.Println(ses)
 	if ses == nil {
 		return nil
 	}
 	return &MongoStore{
-		ses: ses,
+		ses:     ses,
+		dboname: db,
+		colname: collection,
+		col:     ses.DB(db).C(collection),
 	}
 }
 
@@ -77,7 +84,7 @@ func (ms *MongoStore) Insert(dev *Device) (*Device, error) {
 //Update applies DeviceUpdates to the given device ID
 //and returns an error if any occur
 func (ms *MongoStore) Update(id bson.ObjectId, updates *Updates) error {
-	if len(id) < 1 || reflect.DeepEqual(Updates{}, updates) {
+	if len(id) < 1 {
 		return invalidQuery
 	}
 	coll := ms.ses.DB("store").C("devices")
@@ -85,16 +92,6 @@ func (ms *MongoStore) Update(id bson.ObjectId, updates *Updates) error {
 	if err := coll.UpdateId(id, bson.M{"$set": updates}); err != nil {
 		return err
 	}
-
-	// *** device.go handles the rest ***
-	// dev, err := ms.GetByID(id)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if err = dev.ApplyUpdates(updates); err != nil {
-	// 	return nil, err
-	// }
 	return nil
 }
 

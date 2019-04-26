@@ -1,7 +1,7 @@
 # new-ERA
 
-New era is a reliable Earthquake Emergency Alert System that requires only a simple device to deliver lightning fast warnings. Even when your cellphone is down, new era is there to protect you.
-
+Create a system that acts as an intermediary between ShakeAlert earthquake warnings and the public, such as schools in Washington State. The system broadcasts earthquake warnings and aftermath effects related to earthquakes in a fast and reliable manner such that students and faculty can take appropriate actions to protect themselves. The system can be easily adopted to target different groups such as first responders and families. In addition, the system determines some baseline latency metrics between different components to offer a comparison between different solutions and evaluate the efficiency in broadcasting ShakeAlert information.
+ 
 
 ## Team Members
 
