@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, 
+initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>New-Era</title>
+    <link rel="stylesheet" 
+href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
+integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+</head>
+
+<body>
+    <header class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1>New-ERA</h1>
+        </div>
+    </header>
+    <div class="container">
+        <div>
+            <input type="text" id="text-input" placeholder="Enter message" >
+            <input type="text" id="auth-input" placeholder="Enter auth token" >
+            <input type="submit" onclick="submit();">
+            <div id="data">
+                <div id="map"></div>
+                <h3 id="channel_name"></h3>
+                <div id="channel_descr"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let sock;
+        function submit() {
+            let token = document.getElementById("auth-input").value;
+            let clientMsg = document.getElementById("text-input").value;
+            let res = document.getElementById("data");
+            console.log(clientMsg);
+            sock = new WebSocket("wss://api.bfranzen.me/ws?auth=" + token);
+            sock.onopen = () => {
+                console.log("Connection Opened");
+                sock.send(clientMsg);
+            };
+            sock.onclose = () => {
+                console.log("Connection Closed");
+            };
+            sock.onmessage = (msg) => {
+                let m = JSON.parse(msg.data)
+                console.log(m)
+                let loc = m.location
+                let res = loc.split(",")
+                var map;
+                function initMap() {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: parseFloat(res[0]), lng: parseFloat(res[1])},
+                    zoom: 8
+                });
+                }
+                // switch(m.type) {
+                //     case "channel-new":
+                //         document.getElementById("channel_name").textContent = m.channel.name
+                //         document.getElementById("channel_descr").textContent = m.channel.description
+                //         break;
+                //     case "channel-update":
+                //         document.getElementById("channel_name").textContent = m.channel.name
+                //         document.getElementById("channel_descr").textContent = m.channel.description
+                //         break;
+                //     case "channel-delete":
+                //         document.getElementById("channel_name").textContent = ""
+                //         document.getElementById("channel_descr").textContent = ""
+                //         break;
+                //     case "message-new":
+                //         let c = document.getElementById("channel")
+                //         let p = document.createElement("p")
+                //         let s = document.createElement("span")
+                //         s.style.textIndent = "30px"
+                //         s.innerHTML = "by: " + m.message.creator.userName
+                //         s.id = "msg" + m.message.id
+                //         p.innerHTML = m.message.body
+                //         p.id = "msg" + m.message.id
+                //         c.appendChild(p)
+                //         c.appendChild(s)
+                //         break;
+                //     case "message-update":
+                //         let id = "msg" + m.message.id
+                //         let msg = document.getElementById(id)
+                //         msg.innerHTML = m.message.body
+                //         break; 
+                //     case "message-delete":
+                //         id = "msg" + m.message.id
+                //         msg = document.getElementById(id)
+                //         let span = document.getElementById(id)
+                //         msg.parentNode.removeChild(msg)
+                //         span.parentNode.removeChild(span)
+                //         break;
+                //}
+            };
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" async defer></script>
+</body>
+
+</html>

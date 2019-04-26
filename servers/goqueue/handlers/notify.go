@@ -29,6 +29,7 @@ type Alert struct {
 	Magnitude string          `json:"magnitude,omitempty"`
 	Intensity string          `json:"intensity,omitempty"`
 	Time      string          `json:"time,omitempty"`
+	Message   string          `json:"message,omitempty"`
 	DeviceIDs []bson.ObjectId `json:"deviceIDs,omitempty"`
 }
 
@@ -95,9 +96,11 @@ func makeContour(data string) *polyclip.Contour {
 // TestHandler simulates a message being pushed onto the RabbitMQ queue
 func (ctx *QueueContext) TestHandler(w http.ResponseWriter, r *http.Request) {
 	data := Alert{
+		Location:  "47.653823, -122.307768",
 		Magnitude: "5.5",
 		Intensity: "4",
 		Time:      "60",
+		Message:   "Light Shaking Expected, head for cover",
 	}
 	ctx.PublishData(data, NewEra)
 }
