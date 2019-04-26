@@ -51,7 +51,7 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 	respond(w, device, http.StatusCreated)
 }
 
-// SpecificUserHandler handles request for a specific device, requiring a prexisting sessions.
+// SpecificDeviceHandler handles request for a specific device, requiring a prexisting sessions.
 // GET returns device info with given device name
 // PATCH updates the device name
 func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.Request) {

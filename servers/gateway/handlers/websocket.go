@@ -79,8 +79,14 @@ func (ctx *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *
 				break
 			} else if err != nil {
 				fmt.Println("Error reading message.")
-				// TODO: SEND MSG TO DEVICE OWNER VIA OTHER MEDIUM
-				// TWILIO OR EMAIL
+				/*
+					 TODO: 
+					 1. SEND MSG TO DEVICE OWNER VIA OTHER MEDIUM
+						 TWILIO OR EMAIL
+					 2. This is not meant to happen,
+						 so we should log error, probably to another
+						 data store?
+				*/
 				break
 			}
 
