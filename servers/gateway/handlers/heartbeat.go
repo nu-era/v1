@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -22,30 +22,30 @@ const (
 )
 
 func heartbeat(conn *websocket.Conn) {
-
+	fmt.Println("Beggining to send pings")
 	for {
 		conn.SetReadLimit(maxMessageSize)
 		conn.SetReadDeadline(time.Now().Add(pongWait))
 
-		log.Println("Sending: ping.")
+		fmt.Println("Sending: ping.")
 		err := conn.WriteMessage(websocket.TextMessage, []byte("ping"))
 		if err != nil {
-			log.Println("Write Error: ", err)
+			fmt.Println("Write Error: ", err)
 			break
 		}
 
 		msgType, bytes, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("Read Error: ", err)
+			fmt.Println("Read Error: ", err)
 			break
 		}
 
 		// We don't recognize any message that is not "ping".
 		if msg := string(bytes[:]); msgType != websocket.TextMessage && msg != "pong" {
-			log.Println("Unrecognized message received.")
+			fmt.Println("Unrecognized message received.")
 			continue
 		} else {
-			log.Println("Received: pong.")
+			fmt.Println("Received: pong.")
 		}
 	}
 }

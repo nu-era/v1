@@ -3,11 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/New-Era/servers/gateway/handlers"
-	"github.com/New-Era/servers/gateway/models/devices"
-	"github.com/New-Era/servers/gateway/sessions"
-	"github.com/go-redis/redis"
-	mgo "gopkg.in/mgo.v2"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -16,6 +11,12 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/New-Era/servers/gateway/handlers"
+	"github.com/New-Era/servers/gateway/models/devices"
+	"github.com/New-Era/servers/gateway/sessions"
+	"github.com/go-redis/redis"
+	mgo "gopkg.in/mgo.v2"
 )
 
 // main entry point for the server
@@ -103,7 +104,7 @@ func main() {
 	mux.HandleFunc("/device", hc.DevicesHandler)
 	mux.HandleFunc("/ws", hc.WebSocketConnectionHandler)
 	mux.HandleFunc("/setup", hc.DevicesHandler)
-	mux.HandleFunc("/device-info", hc.SpecificDeviceHandler)
+	mux.HandleFunc("/device-info/", hc.SpecificDeviceHandler)
 	mux.HandleFunc("/connect", hc.SessionsHandler)
 	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
 	mux.Handle("/test", goQProxy)

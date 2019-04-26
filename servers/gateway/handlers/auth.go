@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"path"
 	"time"
 
 	"github.com/New-Era/servers/gateway/models/devices"
@@ -36,6 +35,11 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if _, err := ctx.deviceStore.GetByName(device.Name); err == nil {
+		http.Error(w, fmt.Sprintf("device name already exists"), http.StatusBadRequest)
+		return
+	}
+
 	device, err = ctx.deviceStore.Insert(device)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error adding device: %v", err), http.StatusInternalServerError)
@@ -51,7 +55,7 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 	respond(w, device, http.StatusCreated)
 }
 
-// SpecificUserHandler handles request for a specific device, requiring a prexisting sessions.
+// SpecificDeviceHandler handles request for a specific device, requiring a prexisting sessions.
 // GET returns device info with given device name
 // PATCH updates the device name
 func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,10 +75,11 @@ func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.
 		}
 		respond(w, device, http.StatusOK)
 	case "PATCH":
-		segment := path.Base(r.URL.Path)
-		if segment != "me" && segment != deviceID.Hex() {
-			http.Error(w, "unathorized", http.StatusUnauthorized)
-		}
+		// segment := path.Base(r.URL.Path)
+		// if segment != "me" || segment != deviceID.Hex() {
+		// 	http.Error(w, "unathorized", http.StatusUnauthorized)
+		// 	return
+		// }
 		if r.Header.Get(headerContentType) != contentTypeJSON {
 			http.Error(w, "content type must be application/json", http.StatusUnsupportedMediaType)
 			return
@@ -162,10 +167,10 @@ func (ctx *HandlerContext) SpecificSessionHandler(w http.ResponseWriter, r *http
 		http.Error(w, "method must be DELETE", http.StatusMethodNotAllowed)
 		return
 	}
-	if segment := path.Base(r.URL.Path); segment != "mine" {
-		http.Error(w, "unknown path segment", http.StatusForbidden)
-		return
-	}
+	// if segment := path.Base(r.URL.Path); segment != "mine" {
+	// 	http.Error(w, "unknown path segment", http.StatusForbidden)
+	// 	return
+	// }
 	if _, err := sessions.EndSession(r, ctx.SigningKey, ctx.SessStore); err != nil {
 		http.Error(w, fmt.Sprintf("session not found: %v", err), http.StatusBadRequest)
 		return
