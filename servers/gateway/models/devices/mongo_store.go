@@ -83,7 +83,7 @@ func (ms *MongoStore) Insert(dev *Device) (*Device, error) {
 
 //Update applies DeviceUpdates to the given device ID
 //and returns an error if any occur
-func (ms *MongoStore) Update(id bson.ObjectId, updates *Updates) error {
+func (ms *MongoStore) Update(id bson.ObjectId, updates *Device) error {
 	if len(id) < 1 {
 		return invalidQuery
 	}

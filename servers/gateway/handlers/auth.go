@@ -101,7 +101,7 @@ func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.
 			return
 		}
 
-		if err = ctx.deviceStore.Update(deviceID, deviceUpdates); err != nil {
+		if err = ctx.deviceStore.Update(deviceID, device); err != nil {
 			http.Error(w, fmt.Sprintf("error updating device: %v", err), http.StatusBadRequest)
 			return
 		}
