@@ -75,7 +75,6 @@ func (s *SocketStore) RemoveConnection(id bson.ObjectId) {
 // (if the message is intended for a private channel), or to all of them (if the message
 // is posted on a public channel
 func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, messageType int, data []byte) error {
-	fmt.Printf("Number of devices to send to: %d", len(deviceIDs))
 	var writeError error
 	if len(deviceIDs) > 0 { // private channel
 		for _, id := range deviceIDs {
@@ -140,17 +139,12 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 	// Insert our connection onto our datastructure for ongoing usage
 	hc.Sockets.InsertConnection(sess.Device.ID, conn)
 	// Invoke a goroutine for handling control messages from this connection
-	fmt.Println("CONNECTION INSERTED")
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()
 		defer hc.Sockets.RemoveConnection(deviceID)
 
 		for {
 			messageType, p, err := conn.ReadMessage()
-			fmt.Println("DATA SENT: vvv")
-			fmt.Println(p)
-			fmt.Println("----------------------")
-			fmt.Println(err)
 			if len(p) > 0 {
 				var j map[string]interface{}
 				if err := json.Unmarshal(p, &j); err != nil {

@@ -4,7 +4,7 @@ set -e
 docker push bfranzen1/newera-gateway
 #docker push newera/mysql  
 
-# build websocket microservice container
+# build goqueue microservice container
 (cd ../goqueue/ ; sh build.sh)
 docker push bfranzen1/goqueue
 
