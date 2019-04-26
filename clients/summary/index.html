@@ -61,14 +61,16 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     let loc = m.location
                     let res = loc.split(",")
                     var map;
-                    function initMap(lat, long) {
+                    function initMap() {
                         console.log("MAKING MAP")
                         map = new google.maps.Map(document.getElementById('map'), {
-                            center: {lat: lat, lng: long},
+                            center: {lat: parseFloat(res[0]), lng: parseFloat(res[1])},
                             zoom: 8
                         });
                     }
-                    initMap(parseFloat(res[0]), parseFloat(res[1]))
+                    //initMap(parseFloat(res[0]), parseFloat(res[1]))
+                    let api = document.getElementById("mapAPI")
+                    api.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap"
                     // switch(m.type) {
                     //     case "channel-new":
                     //         document.getElementById("channel_name").textContent = m.channel.name
@@ -114,7 +116,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
             };
         }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM" async defer></script>
+    <script id="mapAPI" defer></script>
 </body>
 
 </html>
