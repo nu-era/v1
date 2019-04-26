@@ -37,6 +37,7 @@ func heartbeat(conn *websocket.Conn) {
 		msgType, bytes, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("Read Error: ", err)
+			Send("+4254229586", trialNum, "Hey Dude")
 			break
 		}
 
