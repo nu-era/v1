@@ -102,6 +102,7 @@ func (nu *NewDevice) ToDevice() (*Device, error) {
 		Name:   nu.Name,
 		Lat:    nu.Lat,
 		Long:   nu.Long,
+		Phone:  nu.Phone,
 		Status: "down",
 	}
 	// hash and set passHash field of device
@@ -157,7 +158,7 @@ func (d *Device) ApplyUpdates(updates *Updates) error {
 	}
 	if len(updates.Phone) > 10 && len(updates.Phone) < 12 {
 		d.Phone = updates.Phone
-	} else {
+	} else if len(updates.Phone) > 0 {
 		return errors.New("Not a valid phone number")
 	}
 	if len(updates.OldPassword) != 0 {
