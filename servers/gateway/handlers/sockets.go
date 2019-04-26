@@ -147,7 +147,7 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 		defer hc.Sockets.RemoveConnection(deviceID)
 
 		for {
-			messageType, p, err := conn.ReadMessage()
+			messageType, p, conErr := conn.ReadMessage()
 			if len(p) > 0 {
 				var j map[string]interface{}
 				if err := json.Unmarshal(p, &j); err != nil {
@@ -158,9 +158,9 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 			if messageType == CloseMessage {
 				fmt.Println("Close message received...")
 				break
-			} else if err != nil {
+			} else if conErr != nil {
 				fmt.Printf("error connecting: %v, closing...", err)
-				//break
+				break
 			}
 			// ignore ping and pong messages
 		}
