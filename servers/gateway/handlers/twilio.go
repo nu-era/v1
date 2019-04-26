@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-
 /*
 // Send sends a twilio text message to the provided number from the
 // number provided in 'numberFrom'. The message body is determined
@@ -30,16 +29,21 @@ func Send(numberTo string, numberFrom string, msgBody string) error {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	// Make HTTP POST request and return message SID
-	resp, _ := client.Do(req)
-	if (resp.StatusCode >= 200 && resp.StatusCode < 300) {
-		var data map[string]interface{}
-		decoder := json.NewDecoder(resp.Body)
-		err := decoder.Decode(&data)
-		if err == nil {
-			fmt.Println(data["sid"])
+	resp, err := client.Do(req)
+	fmt.Println(resp)
+	if err != nil {
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			var data map[string]interface{}
+			decoder := json.NewDecoder(resp.Body)
+			err := decoder.Decode(&data)
+			if err == nil {
+				fmt.Println(data["sid"])
+			}
+		} else {
+			fmt.Println(resp.Status)
 		}
 	} else {
-		fmt.Println(resp.Status)
+		fmt.Println(err)
 	}
 
 	return nil
