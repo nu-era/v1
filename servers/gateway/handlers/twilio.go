@@ -36,8 +36,6 @@ func Send(numberTo string, numberFrom string, msgBody string) error {
 
 	// Make HTTP POST request and return message SID
 	resp, err := client.Do(req)
-	fmt.Println("Response: ", resp)
-	fmt.Println("Error: ", err)
 	if err == nil {
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			var data map[string]interface{}
