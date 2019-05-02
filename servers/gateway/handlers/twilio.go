@@ -15,6 +15,7 @@ import (
 // NOTE: Since we are using a trial version of twilio, there will be
 */
 func Send(numberTo string, numberFrom string, msgBody string) error {
+	fmt.Println("Begginning to send twilio msg...")
 	msgData := url.Values{}
 	msgData.Set("To", numberTo)
 	msgData.Set("From", numberFrom)
@@ -23,15 +24,22 @@ func Send(numberTo string, numberFrom string, msgBody string) error {
 
 	// Create HTTP request client
 	client := &http.Client{}
-	req, _ := http.NewRequest("POST", twilURLString, &msgDataReader)
+	req, err := http.NewRequest("POST", twilURLString, &msgDataReader)
+
+	if err != nil {
+		fmt.Println("Error creating twilio request: ", err)
+	}
+
 	req.SetBasicAuth(accountSid, authToken)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	// Make HTTP POST request and return message SID
 	resp, err := client.Do(req)
-	if err != nil {
-		if resp.StatusCode != 0 && resp.StatusCode >= 200 && resp.StatusCode < 300 {
+	fmt.Println("Response: ", resp)
+	fmt.Println("Error: ", err)
+	if err == nil {
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			var data map[string]interface{}
 			decoder := json.NewDecoder(resp.Body)
 			err := decoder.Decode(&data)
@@ -42,7 +50,7 @@ func Send(numberTo string, numberFrom string, msgBody string) error {
 			fmt.Println(resp.Status)
 		}
 	} else {
-		fmt.Println(err)
+		fmt.Println("Error getting twilio response: ", err)
 	}
 
 	return nil
