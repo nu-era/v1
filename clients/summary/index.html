@@ -13,7 +13,19 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         crossorigin="anonymous">
     <style>
         #map {
-            height: 100%;
+            height: 500px;
+            width: 500px;
+            float: right;
+        }
+        h1 {
+            text-align: center;
+        }
+        #data {
+            display: inline;
+        }
+        #info {
+            margin-top: 10%;
+            float: left;
         }
     </style>
 </head>
@@ -28,24 +40,49 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         <div>
             <input type="text" id="text-input" placeholder="Enter message" >
             <input type="text" id="auth-input" placeholder="Enter auth token" >
-            <input type="submit" onclick="submit();">
+            <input type="submit" class="btn btn-primary" onclick="submit();">
             <div id="data">
-                <div id="map"></div>
-                <h3 id="channel_name"></h3>
-                <div id="channel_descr"></div>
+                <div id="info">
+                    <h4 id="int">Expected Intensity: </h4>
+                    <p id="loc">Estimated Location: </p>
+                    <p id="time">Estimated time until shaking: </p>
+                </div>
             </div>
+            <div id="map"></div>
+            <button class="btn btn-info" onclick="demo();">demo</button>
         </div>
     </div>
     <script>
         let sock;
         var map;
+        var marker;
+        var bounds;  
 
-        function initMap() {
-            console.log("MAKING MAP")
+        function initMap(lat, long) {
+            if ((lat == null) || (long == null)) {
+                lat = parseFloat(-34.397)
+                long = parseFloat(150.644)
+            }
+            bounds = new google.maps.LatLngBounds(); 
             map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: -34.397, lng: 150.644},
+                center: {lat: lat, lng: long},
                 zoom: 8
+            
             });
+
+            marker = new google.maps.Marker({
+                position: map.center,
+                map: map,
+                title: 'Location of earthquake'
+            });
+            bounds.extend(marker.position)
+        }
+
+        function demo() {
+            const http = new XMLHttpRequest();
+
+            http.open("GET", "https://api.bfranzen.me/test")
+            http.send();
         }
         function submit() {
             let token = document.getElementById("auth-input").value;
@@ -75,10 +112,18 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     console.log(m)
                     let loc = m.location
                     let res = loc.split(",")
-                    map.center = {lat : parseFloat(res[0]), lng: parseFloat(res[1])}
-                    
+                    //map.center = {lat : parseFloat(res[0]), lng: parseFloat(res[1])}
+                    //console.log(map.center)
                     //initMap(parseFloat(res[0]), parseFloat(res[1]))
-                    initMap()
+                    initMap(parseFloat(res[0]), parseFloat(res[1]))
+
+                    var circle = new google.maps.Circle({
+                        map: map,
+                        radius: 16000,    // 10 miles in metres
+                        fillColor: '#AA0000'
+                    });
+                    circle.bindTo('center', marker, 'position');
+                    map.zoom = (circle.radius % 10) + 9
                     // switch(m.type) {
                     //     case "channel-new":
                     //         document.getElementById("channel_name").textContent = m.channel.name
