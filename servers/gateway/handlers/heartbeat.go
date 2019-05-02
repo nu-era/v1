@@ -26,7 +26,7 @@ func heartbeat(conn *websocket.Conn) {
 	for {
 		conn.SetReadLimit(maxMessageSize)
 		conn.SetReadDeadline(time.Now().Add(pongWait))
-		time.Sleep(pingPeriod)
+		time.Sleep(10 * time.Second)
 		conn.SetWriteDeadline(time.Now().Add(writeWait))
 
 		fmt.Println("Sending: ping.")
@@ -39,6 +39,7 @@ func heartbeat(conn *websocket.Conn) {
 		msgType, bytes, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("Read Error: ", err)
+			//Send("+4254229586", trialNum, "HEY DUDE")
 			break
 		}
 

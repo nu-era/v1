@@ -11,6 +11,11 @@ initial-scale=1.0">
 href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
 integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
+    <style>
+        #map {
+            height: 100%;
+        }
+    </style>
 </head>
 
 <body>
@@ -33,6 +38,15 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
     </div>
     <script>
         let sock;
+        var map;
+
+        function initMap() {
+            console.log("MAKING MAP")
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: -34.397, lng: 150.644},
+                zoom: 8
+            });
+        }
         function submit() {
             let token = document.getElementById("auth-input").value;
             let clientMsg = document.getElementById("text-input").value;
@@ -47,6 +61,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                 console.log("Connection Closed");
             };
             sock.onmessage = (msg) => {
+                
                 function IsJsonString(str) {
                     try {
                         JSON.parse(str);
@@ -60,17 +75,10 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     console.log(m)
                     let loc = m.location
                     let res = loc.split(",")
-                    var map;
-                    function initMap() {
-                        console.log("MAKING MAP")
-                        map = new google.maps.Map(document.getElementById('map'), {
-                            center: {lat: parseFloat(res[0]), lng: parseFloat(res[1])},
-                            zoom: 8
-                        });
-                    }
+                    map.center = {lat : parseFloat(res[0]), lng: parseFloat(res[1])}
+                    
                     //initMap(parseFloat(res[0]), parseFloat(res[1]))
-                    let api = document.getElementById("mapAPI")
-                    api.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap"
+                    initMap()
                     // switch(m.type) {
                     //     case "channel-new":
                     //         document.getElementById("channel_name").textContent = m.channel.name
@@ -116,7 +124,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
             };
         }
     </script>
-    <script id="mapAPI" defer></script>
+    <script id="mapAPI" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" asynch defer></script>
 </body>
 
 </html>
