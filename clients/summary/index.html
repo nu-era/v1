@@ -16,6 +16,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
             height: 500px;
             width: 500px;
             float: right;
+            margin-top: 20px;
         }
         h1 {
             text-align: center;
@@ -26,6 +27,20 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         #info {
             margin-top: 10%;
             float: left;
+        }
+
+        h4 {
+            margin-bottom: 50px;
+            font-weight: 300 bold;
+        }
+        span {
+            font-size: 50px;
+            color: red;
+        }
+        #time {
+            margin-top: 100px;
+            font-size: 25px;
+            font-weight: 300 bold;
         }
     </style>
 </head>
@@ -40,16 +55,15 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         <div>
             <input type="text" id="text-input" placeholder="Enter message" >
             <input type="text" id="auth-input" placeholder="Enter auth token" >
-            <input type="submit" class="btn btn-primary" onclick="submit();">
+            <button class="btn btn-primary" onclick="submit();">Connect</button>
             <div id="data">
                 <div id="info">
-                    <h4 id="int">Expected Intensity: </h4>
-                    <p id="loc">Estimated Location: </p>
-                    <p id="time">Estimated time until shaking: </p>
+                    <h4 hidden=true id="int">Expected Intensity: </h4>
+                    <p hidden=true id="time"></p>
                 </div>
             </div>
             <div id="map"></div>
-            <button class="btn btn-info" onclick="demo();">demo</button>
+            <button class="btn btn-info" onclick="demo();">Show Demo</button>
         </div>
     </div>
     <script>
@@ -124,6 +138,24 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     });
                     circle.bindTo('center', marker, 'position');
                     map.zoom = (circle.radius % 10) + 9
+
+                    let int = document.getElementById("int")
+                    let time = document.getElementById("time")
+                    time.hidden = false;
+                    int.hidden = false;
+                    int.innerHTML = int.innerHTML + " " + m.intensity + " <br/> <br/>" + m.message
+                    time.innerHTML = time.innerHTML + m.time
+                    let tmp = m.time
+                    var t = setInterval(function() {
+                        var left = tmp - 1
+                        time.innerHTML = "Estimated <span>" + left + "</span>s until shaking"
+                        if (left < 0) {
+                            clearInterval(t);
+                            document.getElementById("time").innerHTML = "EXPIRED";
+                            time.hidden = true;
+                        }
+                        tmp = left
+                    }, 1000)
                     // switch(m.type) {
                     //     case "channel-new":
                     //         document.getElementById("channel_name").textContent = m.channel.name
