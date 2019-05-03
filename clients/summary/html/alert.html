@@ -64,6 +64,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         </div>
     </div>
     <script>
+        window.myVar = `{{ env('MY_VAR') }}`;
         let sock;
         var map;
         var marker;
@@ -141,8 +142,9 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     int.innerHTML = int.innerHTML + " " + m.intensity + " <br/> <br/>" + m.message
                     time.innerHTML = time.innerHTML + m.time
                     let tmp = m.time
+                    var left;
                     var t = setInterval(function() {
-                        var left = tmp - 1
+                        left = tmp - 1
                         time.innerHTML = "Estimated <span>" + left + "</span>s until shaking"
                         if (left < 0) {
                             clearInterval(t);
@@ -152,9 +154,13 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                         tmp = left
                     }, 1000)
                     var announce = setInterval(function() {
+
                         var msg = new SpeechSynthesisUtterance(m.message);
                         window.speechSynthesis.speak(msg);
-                    }, 5000)
+                        if (left < 0) {
+                            clearInterval(announce);
+                        }
+                    }, 4000)
                 
                 } else {
                     console.log(msg)
