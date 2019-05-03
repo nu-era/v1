@@ -1,32 +1,39 @@
-
+*, *:before, *:after {
+  box-sizing: border-box;
+}
   html {
     overflow-y: scroll;
   }
+
+  :root {
+    --ne_red: rgb(160, 24, 24);
+  }
+  
   
   body {
-    background: black;
+    background: eggshell;
     color: white;
     font-family: "Titillium Web", sans-serif;
   }
   
   a {
     text-decoration: none;
-    color: #1ab188;
+    color: var(--ne_red);
     transition: 0.5s ease;
   }
   a:hover {
-    color: #179b77;
+    color: var(--ne_red);
   }
   
   .form {
-    background: rgba(19, 35, 47, 0.9);
+    background: rgba(33, 42, 49, 0.9);
     padding: 40px;
     padding-top: 10px;
     max-width: 600px;
     margin: 40px auto;
     margin-top: 10px;
     border-radius: 4px;
-    box-shadow: 0 4px 20px 5px #179b77;
+    box-shadow: 0 4px 20px 5px black;
   }
   
   .tab-group {
@@ -53,11 +60,11 @@
     transition: 0.5s ease;
   }
   .tab-group li a:hover {
-    background: #179b77;
+    background: var(--ne_red);
     color: #ffffff;
   }
   .tab-group .active a {
-    background: #1ab188;
+    background: var(--ne_red);
     color: #ffffff;
   }
   
@@ -84,7 +91,7 @@
   }
   label .req {
     margin: 2px;
-    color: #1ab188;
+    color: var(--ne_red);
   }
   
   label.active {
@@ -108,14 +115,14 @@
     padding: 5px 10px;
     background: none;
     background-image: none;
-    border: 1px solid #a0b3b0;
+    border: 1px solid #dbe6e4;
     color: #ffffff;
     border-radius: 0;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
   }
   input:focus, textarea:focus {
     outline: 0;
-    border-color: #1ab188;
+    border-color: var(--ne_red);
   }
   
   textarea {
@@ -151,13 +158,13 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    background: #1ab188;
+    background: var(--ne_red);
     color: #ffffff;
     transition: all 0.5s ease;
     -webkit-appearance: none;
   }
   .button:hover, .button:focus {
-    background: #4ae9be;
+    background: var(--ne_red);
   }
   
   .button-block {
@@ -172,7 +179,7 @@
   
   .tr-title {
     font-size: 4em;
-    text-shadow: 2px 2px 5px #179b77;
+    text-shadow: 2px 2px 5px var(--ne_red);
     color: white;
     margin-bottom: 0em;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
@@ -196,7 +203,7 @@
     border-style: solid;
     border-width: medium;
     border-radius: 8px;
-    border-color: #179b77;
+    border-color: var(--ne_red);
     width:100px;
     max-height:80vh;
     overflow-y: auto;
@@ -205,7 +212,7 @@
   .chat-t-holder, .stat-t-holder{
     width: 100%;
     text-align: center; 
-    border-bottom: 1px solid #179b77;
+    border-bottom: 1px solid var(--ne_red);
   }
   
   .chat-title, .stat-title {
@@ -220,7 +227,7 @@
     border-style: solid;
     border-width: medium;
     border-radius: 8px;
-    border-color: #179b77;
+    border-color: var(--ne_red);
     width:100px;
     max-height:80vh;
     overflow-y: auto;
@@ -236,7 +243,7 @@
     border-style: solid;
     border-width: medium;
     border-radius: 8px;
-    border-color: #179b77;
+    border-color: var(--ne_red);
     width:100px;
     max-height: 80vh;
     overflow-y: auto;
@@ -253,7 +260,7 @@
     width: 25%;
     height: fit-content;
     border-radius: 8px;
-    border-color: #179b77;
+    border-color: var(--ne_red);
   }
   
   .join {
@@ -286,7 +293,7 @@
   
   .lobby:hover {
     transition: .25s ease;
-    box-shadow: 0 1px 30px 1px #179b77;
+    box-shadow: 0 1px 30px 1px var(--ne_red);
   }
   
   .game {
@@ -307,7 +314,7 @@
     border-style: solid;
     border-width: medium;
     border-radius: 8px;
-    border-color: #179b77;
+    border-color: var(--ne_red);
     color: white;
   }
   
@@ -325,7 +332,7 @@
   }
   
   select {
-    outline-color: #179b77;
+    outline-color: var(--ne_red);
   }
   
   .waiting {
@@ -340,7 +347,7 @@
   
   .form-control {
     color: white;
-    background-color: #179b77;
+    background-color: var(--ne_red);
     margin: auto;
     
   }
