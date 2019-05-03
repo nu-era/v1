@@ -7,10 +7,17 @@
 initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>New-Era</title>
-    <link rel="stylesheet" 
-href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
-integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        #map {
+            height: 500px;
+            width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
@@ -33,6 +40,15 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
     </div>
     <script>
         let sock;
+        var map;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: -34.397, lng: 150.644},
+                zoom: 8
+            });
+            console.log(map)
+        }
         function submit() {
             let token = document.getElementById("auth-input").value;
             let clientMsg = document.getElementById("text-input").value;
@@ -47,59 +63,70 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                 console.log("Connection Closed");
             };
             sock.onmessage = (msg) => {
-                let m = JSON.parse(msg.data)
-                console.log(m)
-                let loc = m.location
-                let res = loc.split(",")
-                var map;
-                function initMap() {
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: {lat: parseFloat(res[0]), lng: parseFloat(res[1])},
-                    zoom: 8
-                });
+                
+                function IsJsonString(str) {
+                    try {
+                        JSON.parse(str);
+                    } catch (e) {
+                        return false;
+                    }
+                    return true;
                 }
-                // switch(m.type) {
-                //     case "channel-new":
-                //         document.getElementById("channel_name").textContent = m.channel.name
-                //         document.getElementById("channel_descr").textContent = m.channel.description
-                //         break;
-                //     case "channel-update":
-                //         document.getElementById("channel_name").textContent = m.channel.name
-                //         document.getElementById("channel_descr").textContent = m.channel.description
-                //         break;
-                //     case "channel-delete":
-                //         document.getElementById("channel_name").textContent = ""
-                //         document.getElementById("channel_descr").textContent = ""
-                //         break;
-                //     case "message-new":
-                //         let c = document.getElementById("channel")
-                //         let p = document.createElement("p")
-                //         let s = document.createElement("span")
-                //         s.style.textIndent = "30px"
-                //         s.innerHTML = "by: " + m.message.creator.userName
-                //         s.id = "msg" + m.message.id
-                //         p.innerHTML = m.message.body
-                //         p.id = "msg" + m.message.id
-                //         c.appendChild(p)
-                //         c.appendChild(s)
-                //         break;
-                //     case "message-update":
-                //         let id = "msg" + m.message.id
-                //         let msg = document.getElementById(id)
-                //         msg.innerHTML = m.message.body
-                //         break; 
-                //     case "message-delete":
-                //         id = "msg" + m.message.id
-                //         msg = document.getElementById(id)
-                //         let span = document.getElementById(id)
-                //         msg.parentNode.removeChild(msg)
-                //         span.parentNode.removeChild(span)
-                //         break;
-                //}
+                if (IsJsonString(msg.data)) {
+                    let m = JSON.parse(msg.data)
+                    console.log(m)
+                    let loc = m.location
+                    let res = loc.split(",")
+                    map.center = {lat : parseFloat(res[0]), lng: parseFloat(res[1])}
+                    
+                    //initMap(parseFloat(res[0]), parseFloat(res[1]))
+                    initMap()
+                    // switch(m.type) {
+                    //     case "channel-new":
+                    //         document.getElementById("channel_name").textContent = m.channel.name
+                    //         document.getElementById("channel_descr").textContent = m.channel.description
+                    //         break;
+                    //     case "channel-update":
+                    //         document.getElementById("channel_name").textContent = m.channel.name
+                    //         document.getElementById("channel_descr").textContent = m.channel.description
+                    //         break;
+                    //     case "channel-delete":
+                    //         document.getElementById("channel_name").textContent = ""
+                    //         document.getElementById("channel_descr").textContent = ""
+                    //         break;
+                    //     case "message-new":
+                    //         let c = document.getElementById("channel")
+                    //         let p = document.createElement("p")
+                    //         let s = document.createElement("span")
+                    //         s.style.textIndent = "30px"
+                    //         s.innerHTML = "by: " + m.message.creator.userName
+                    //         s.id = "msg" + m.message.id
+                    //         p.innerHTML = m.message.body
+                    //         p.id = "msg" + m.message.id
+                    //         c.appendChild(p)
+                    //         c.appendChild(s)
+                    //         break;
+                    //     case "message-update":
+                    //         let id = "msg" + m.message.id
+                    //         let msg = document.getElementById(id)
+                    //         msg.innerHTML = m.message.body
+                    //         break; 
+                    //     case "message-delete":
+                    //         id = "msg" + m.message.id
+                    //         msg = document.getElementById(id)
+                    //         let span = document.getElementById(id)
+                    //         msg.parentNode.removeChild(msg)
+                    //         span.parentNode.removeChild(span)
+                    //         break;
+                    //}
+                } else {
+                    console.log(msg)
+                }
+                sock.send("IM ALIVE")
             };
         }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" async defer></script>
+    <script id="mapAPI" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" defer></script>
 </body>
 
 </html>

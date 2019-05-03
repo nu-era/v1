@@ -22,14 +22,14 @@ const (
 )
 
 func heartbeat(conn *websocket.Conn) {
-	fmt.Println("Beggining to send pings")
+	//fmt.Println("Beggining to send pings")
 	for {
 		conn.SetReadLimit(maxMessageSize)
 		conn.SetReadDeadline(time.Now().Add(pongWait))
-		time.Sleep(pingPeriod)
+		time.Sleep(10 * time.Second)
 		conn.SetWriteDeadline(time.Now().Add(writeWait))
 
-		fmt.Println("Sending: ping.")
+		//fmt.Println("Sending: ping.")
 		err := conn.WriteMessage(websocket.TextMessage, []byte("ping"))
 		if err != nil {
 			fmt.Println("Write Error: ", err)
@@ -39,7 +39,7 @@ func heartbeat(conn *websocket.Conn) {
 		msgType, bytes, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("Read Error: ", err)
-			Send("+14254229586", trialNum, dcMsg)
+			//Send("+14254229586", trialNum, dcMsg)
 			break
 		}
 
@@ -48,7 +48,7 @@ func heartbeat(conn *websocket.Conn) {
 			fmt.Println("Unrecognized message received.")
 			continue
 		} else {
-			fmt.Println("Received: pong.")
+			//fmt.Println("Received: pong.")
 		}
 	}
 }
