@@ -80,7 +80,7 @@ $('#new-user-form').submit(function(e) {
             var userData = JSON.stringify(data);
             localStorage.setItem('auth', auth);
             localStorage.setItem('user', userData);
-            window.location.replace("/app/public/landing.html");
+            window.location.replace("./html/alert.html");
         },
         error: function(jqXhr, textStatus, errorThrown) {
             alert(jqXhr.responseText);
@@ -108,7 +108,7 @@ $('#user-form').submit(function(e) {
             var userData = JSON.stringify(data);
             localStorage.setItem('auth', auth);
             localStorage.setItem('user', userData);
-            window.location.replace("/app/public/landing.html");
+            window.location.replace("./html/alert.html");
         },
         error: function(jqXhr, textStatus, errorThrown) {
             alert(jqXhr.responseText);

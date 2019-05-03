@@ -3,205 +3,111 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, 
-initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>New-Era</title>
-    <link rel="stylesheet" 
-href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
-integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-        crossorigin="anonymous">
-    <style>
-        #map {
-            height: 500px;
-            width: 500px;
-            float: right;
-            margin-top: 20px;
-        }
-        h1 {
-            text-align: center;
-        }
-        #data {
-            display: inline;
-        }
-        #info {
-            margin-top: 10%;
-            float: left;
-        }
+    <title>New-ERA</title>
+    <base href="/">
+    <link rel="stylesheet" href="../styles/styles.css">
 
-        h4 {
-            margin-bottom: 50px;
-            font-weight: 300 bold;
-        }
-        span {
-            font-size: 50px;
-            color: red;
-        }
-        #time {
-            margin-top: 100px;
-            font-size: 25px;
-            font-weight: 300 bold;
-        }
-    </style>
 </head>
 
 <body>
-    <header class="jumbotron jumbotron-fluid">
-        <div class="container">
-            <h1>New-ERA</h1>
-        </div>
-    </header>
-    <div class="container">
-        <div>
-            <input type="text" id="text-input" placeholder="Enter message" >
-            <input type="text" id="auth-input" placeholder="Enter auth token" >
-            <button class="btn btn-primary" onclick="submit();">Connect</button>
-            <div id="data">
-                <div id="info">
-                    <h4 hidden=true id="int">Expected Intensity: </h4>
-                    <p hidden=true id="time"></p>
-                </div>
-            </div>
-            <div id="map"></div>
-            <button class="btn btn-info" onclick="demo();">Show Demo</button>
-        </div>
-    </div>
-    <script>
-        let sock;
-        var map;
-        var marker;
-        var bounds;  
+    <div class="form">
+        <h1 class="tr-title">Trivia Royale</h1>
+        <a href="./html/alert.html">React</a>
+        <ul class="tab-group">
+            <li class="tab active"><a href="#signup">Sign Up</a></li>
+            <li class="tab"><a href="#login">Log In</a></li>
+        </ul>
 
-        function initMap(lat, long) {
-            if ((lat == null) || (long == null)) {
-                lat = parseFloat(-34.397)
-                long = parseFloat(150.644)
-            }
-            bounds = new google.maps.LatLngBounds(); 
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: lat, lng: long},
-                zoom: 8
-            
-            });
+        <div class="tab-content">
+            <div id="signup">
+                <h1>Sign Up for Free</h1>
+                <form id="new-user-form">
 
-            marker = new google.maps.Marker({
-                position: map.center,
-                map: map,
-                title: 'Location of earthquake'
-            });
-            bounds.extend(marker.position)
-        }
+                    <div class="top-row">
+                        <div class="field-wrap">
+                            <label>
+                                First Name<span class="req">*</span>
+                            </label>
+                            <input name="firstName" type="text" required autocomplete="off" />
+                        </div>
 
-        function demo() {
-            const http = new XMLHttpRequest();
+                        <div class="field-wrap">
+                            <label>
+                                Last Name<span class="req">*</span>
+                            </label>
+                            <input name="lastName" type="text" required autocomplete="off" />
+                        </div>
+                    </div>
 
-            http.open("GET", "https://api.bfranzen.me/test")
-            http.send();
-        }
-        function submit() {
-            let token = document.getElementById("auth-input").value;
-            let clientMsg = document.getElementById("text-input").value;
-            let res = document.getElementById("data");
-            console.log(clientMsg);
-            sock = new WebSocket("wss://api.bfranzen.me/ws?auth=" + token);
-            sock.onopen = () => {
-                console.log("Connection Opened");
-                sock.send(clientMsg);
-            };
-            sock.onclose = () => {
-                console.log("Connection Closed");
-            };
-            sock.onmessage = (msg) => {
+                    <div class="field-wrap">
+                        <label>
+                            Email Address<span class="req">*</span>
+                        </label>
+                        <input name="email" type="email" required autocomplete="off" />
+                    </div>
+
+                    <div class="field-wrap">
+                        <label>
+                            Set A User-Name<span class="req">*</span>
+                        </label>
+                        <input name="userName" required autocomplete="off" />
+                    </div>
+
+                    <div class="field-wrap">
+                        <label>
+                            Set A Password<span class="req">*</span>
+                        </label>
+                        <input name="password" type="password" required autocomplete="off" />
+                    </div>
+
+                    <div class="field-wrap">
+                        <label>
+                            Confirm Password<span class="req">*</span>
+                        </label>
+                        <input name="passwordConf" type="password" required autocomplete="off" />
+                    </div>
+                    <button id="submit-new-user" class="button button-block">Get Started</button>
+                </form>
+
                 
-                function IsJsonString(str) {
-                    try {
-                        JSON.parse(str);
-                    } catch (e) {
-                        return false;
-                    }
-                    return true;
-                }
-                if (IsJsonString(msg.data)) {
-                    let m = JSON.parse(msg.data)
-                    console.log(m)
-                    let loc = m.location
-                    let res = loc.split(",")
-                    //map.center = {lat : parseFloat(res[0]), lng: parseFloat(res[1])}
-                    //console.log(map.center)
-                    //initMap(parseFloat(res[0]), parseFloat(res[1]))
-                    initMap(parseFloat(res[0]), parseFloat(res[1]))
 
-                    var circle = new google.maps.Circle({
-                        map: map,
-                        radius: 16000,    // 10 miles in metres
-                        fillColor: '#AA0000'
-                    });
-                    circle.bindTo('center', marker, 'position');
-                    map.zoom = (circle.radius % 10) + 9
+            </div>
 
-                    let int = document.getElementById("int")
-                    let time = document.getElementById("time")
-                    time.hidden = false;
-                    int.hidden = false;
-                    int.innerHTML = int.innerHTML + " " + m.intensity + " <br/> <br/>" + m.message
-                    time.innerHTML = time.innerHTML + m.time
-                    let tmp = m.time
-                    var t = setInterval(function() {
-                        var left = tmp - 1
-                        time.innerHTML = "Estimated <span>" + left + "</span>s until shaking"
-                        if (left < 0) {
-                            clearInterval(t);
-                            document.getElementById("time").innerHTML = "EXPIRED";
-                            time.hidden = true;
-                        }
-                        tmp = left
-                    }, 1000)
-                    // switch(m.type) {
-                    //     case "channel-new":
-                    //         document.getElementById("channel_name").textContent = m.channel.name
-                    //         document.getElementById("channel_descr").textContent = m.channel.description
-                    //         break;
-                    //     case "channel-update":
-                    //         document.getElementById("channel_name").textContent = m.channel.name
-                    //         document.getElementById("channel_descr").textContent = m.channel.description
-                    //         break;
-                    //     case "channel-delete":
-                    //         document.getElementById("channel_name").textContent = ""
-                    //         document.getElementById("channel_descr").textContent = ""
-                    //         break;
-                    //     case "message-new":
-                    //         let c = document.getElementById("channel")
-                    //         let p = document.createElement("p")
-                    //         let s = document.createElement("span")
-                    //         s.style.textIndent = "30px"
-                    //         s.innerHTML = "by: " + m.message.creator.userName
-                    //         s.id = "msg" + m.message.id
-                    //         p.innerHTML = m.message.body
-                    //         p.id = "msg" + m.message.id
-                    //         c.appendChild(p)
-                    //         c.appendChild(s)
-                    //         break;
-                    //     case "message-update":
-                    //         let id = "msg" + m.message.id
-                    //         let msg = document.getElementById(id)
-                    //         msg.innerHTML = m.message.body
-                    //         break; 
-                    //     case "message-delete":
-                    //         id = "msg" + m.message.id
-                    //         msg = document.getElementById(id)
-                    //         let span = document.getElementById(id)
-                    //         msg.parentNode.removeChild(msg)
-                    //         span.parentNode.removeChild(span)
-                    //         break;
-                    //}
-                } else {
-                    console.log(msg)
-                }
-                sock.send("IM ALIVE")
-            };
-        }
-    </script>
-    <script id="mapAPI" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" asynch defer></script>
+            <div id="login">
+                <h1>Welcome Back!</h1>
+
+                <form id="user-form">
+
+                    <div class="field-wrap">
+                        <label>
+                            Email Address<span class="req">*</span>
+                        </label>
+                        <input name="email" type="email" required autocomplete="off" />
+                    </div>
+
+                    <div class="field-wrap">
+                        <label>
+                            Password<span class="req">*</span>
+                        </label>
+                        <input name="password" type="password" required autocomplete="off" />
+                    </div>
+
+                    <p class="forgot"><a href="#">Forgot Password?</a></p>
+
+                    <button class="button button-block">Log In</button>
+
+                </form>
+
+            </div>
+
+        </div><!-- tab-content -->
+
+    </div> <!-- /form -->
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="./js/sign_in.js"></script>
 </body>
 
 </html>
