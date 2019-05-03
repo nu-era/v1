@@ -1,16 +1,19 @@
 /**
  *********************************
 TODO:
+
     1. Send post request to users
         a. On success, store auth key and possibly user struct in local storage, redirect to lobbies
         b. On fail, show alert with error message
     2. Send get request to users (or whatever validation is)
         a. On success, store auth key and possibly user struct in local storage, redirect to lobbies
         b. On fail, show alert with error message
+
  *********************************
  */
 
-const url = "placeholder.com"
+const newUserUrl = "https://trivia.bfranzen.me/v1/users"
+const retUserUrl = "https://trivia.bfranzen.me/v1/sessions"
 
 
 $('.form').find('input, textarea').on('keyup blur focus', function (e) {
@@ -67,19 +70,20 @@ $('#new-user-form').submit(function(e) {
         values[this.name] = $(this).val();
     });
     var valJson = JSON.stringify(values);
-
     $.ajax({
         type: "POST",
-        url: url,
+        url: newUserUrl,
         contentType: 'application/json',
         data: valJson,
         success: function( data, textStatus, response) {
             var auth = response.getResponseHeader('Authorization');
-            localStorage.setItem('auth', auth)
-            window.location.replace("../public/lobby.html");
+            var userData = JSON.stringify(data);
+            localStorage.setItem('auth', auth);
+            localStorage.setItem('user', userData);
+            window.location.replace("/app/public/landing.html");
         },
         error: function(jqXhr, textStatus, errorThrown) {
-            alert(errorThrown);
+            alert(jqXhr.responseText);
         }
     })
 
@@ -87,5 +91,28 @@ $('#new-user-form').submit(function(e) {
 
 $('#user-form').submit(function(e) {
     e.preventDefault();
-    window.location.replace("../public/lobby.html");
+    var formInputs = $('#user-form :input');
+    console.log(formInputs);
+    var values = {};
+    formInputs.each(function() {
+        values[this.name] = $(this).val();
+    });
+    var valJson = JSON.stringify(values);
+    $.ajax({
+        type: "POST",
+        url: retUserUrl,
+        contentType: 'application/json',
+        data: valJson,
+        success: function( data, textStatus, response) {
+            var auth = response.getResponseHeader('Authorization');
+            var userData = JSON.stringify(data);
+            localStorage.setItem('auth', auth);
+            localStorage.setItem('user', userData);
+            window.location.replace("/app/public/landing.html");
+        },
+        error: function(jqXhr, textStatus, errorThrown) {
+            alert(jqXhr.responseText);
+        }
+    })
 });
+
