@@ -71,6 +71,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         var map;
         var marker;
         var bounds;  
+        const auth = localStorage.getItem('auth');
 
         function initMap(lat, long) {
             if ((lat == null) || (long == null)) {
@@ -99,7 +100,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
             http.send();
         }
         function submit() {
-            let token = document.getElementById("auth-input").value;
+            let token = auth;
             let clientMsg = document.getElementById("text-input").value;
             let res = document.getElementById("data");
             console.log(clientMsg);
