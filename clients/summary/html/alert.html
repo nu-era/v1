@@ -151,44 +151,11 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                         }
                         tmp = left
                     }, 1000)
-                    // switch(m.type) {
-                    //     case "channel-new":
-                    //         document.getElementById("channel_name").textContent = m.channel.name
-                    //         document.getElementById("channel_descr").textContent = m.channel.description
-                    //         break;
-                    //     case "channel-update":
-                    //         document.getElementById("channel_name").textContent = m.channel.name
-                    //         document.getElementById("channel_descr").textContent = m.channel.description
-                    //         break;
-                    //     case "channel-delete":
-                    //         document.getElementById("channel_name").textContent = ""
-                    //         document.getElementById("channel_descr").textContent = ""
-                    //         break;
-                    //     case "message-new":
-                    //         let c = document.getElementById("channel")
-                    //         let p = document.createElement("p")
-                    //         let s = document.createElement("span")
-                    //         s.style.textIndent = "30px"
-                    //         s.innerHTML = "by: " + m.message.creator.userName
-                    //         s.id = "msg" + m.message.id
-                    //         p.innerHTML = m.message.body
-                    //         p.id = "msg" + m.message.id
-                    //         c.appendChild(p)
-                    //         c.appendChild(s)
-                    //         break;
-                    //     case "message-update":
-                    //         let id = "msg" + m.message.id
-                    //         let msg = document.getElementById(id)
-                    //         msg.innerHTML = m.message.body
-                    //         break; 
-                    //     case "message-delete":
-                    //         id = "msg" + m.message.id
-                    //         msg = document.getElementById(id)
-                    //         let span = document.getElementById(id)
-                    //         msg.parentNode.removeChild(msg)
-                    //         span.parentNode.removeChild(span)
-                    //         break;
-                    //}
+                    var announce = setInterval(function() {
+                        var msg = new SpeechSynthesisUtterance(m.message);
+                        window.speechSynthesis.speak(msg);
+                    }, 5000)
+                
                 } else {
                     console.log(msg)
                 }
