@@ -13,7 +13,7 @@ TODO:
  */
 
 const newUserUrl = "https://api.bfranzen.me/setup"
-const retUserUrl = "https://trivia.bfranzen.me/v1/sessions"
+const retUserUrl = "https://api.bfranzen.me/connect"
 
 
 $('.form').find('input, textarea').on('keyup blur focus', function (e) {

@@ -53,9 +53,6 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
     </header>
     <div class="container">
         <div>
-            <input type="text" id="text-input" placeholder="Enter message" >
-            <input type="text" id="auth-input" placeholder="Enter auth token" >
-            <button class="btn btn-primary" onclick="submit();">Connect</button>
             <div id="data">
                 <div id="info">
                     <h4 hidden=true id="int">Expected Intensity: </h4>
@@ -72,7 +69,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         var marker;
         var bounds;  
         const auth = localStorage.getItem('auth');
-
+        submit();
         function initMap(lat, long) {
             if ((lat == null) || (long == null)) {
                 lat = parseFloat(-34.397)
@@ -101,19 +98,16 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         }
         function submit() {
             let token = auth;
-            let clientMsg = document.getElementById("text-input").value;
             let res = document.getElementById("data");
-            console.log(clientMsg);
             sock = new WebSocket("wss://api.bfranzen.me/ws?auth=" + token);
             sock.onopen = () => {
                 console.log("Connection Opened");
-                sock.send(clientMsg);
+                sock.send("connection open");
             };
             sock.onclose = () => {
                 console.log("Connection Closed");
             };
             sock.onmessage = (msg) => {
-                
                 function IsJsonString(str) {
                     try {
                         JSON.parse(str);
