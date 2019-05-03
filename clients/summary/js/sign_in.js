@@ -12,7 +12,7 @@ TODO:
  *********************************
  */
 
-const newUserUrl = "https://trivia.bfranzen.me/v1/users"
+const newUserUrl = "https://api.bfranzen.me/setup"
 const retUserUrl = "https://trivia.bfranzen.me/v1/sessions"
 
 
@@ -69,7 +69,14 @@ $('#new-user-form').submit(function(e) {
     formInputs.each(function() {
         values[this.name] = $(this).val();
     });
+    /* 
+        TODO: Capture lat + long
+    */
+
+    values.latitude = 100.88;
+    values.longitude = 100.88;
     var valJson = JSON.stringify(values);
+
     $.ajax({
         type: "POST",
         url: newUserUrl,

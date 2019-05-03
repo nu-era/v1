@@ -5,16 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>New-ERA</title>
+    <title>Trivia Royale</title>
     <base href="/">
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="styles/style.css">
 
 </head>
 
 <body>
     <div class="form">
-        <h1 class="tr-title">New-ERA</h1>
-        <a href="./html/alert.html">React</a>
+        <h1 class="tr-title">Trivia Royale</h1>
+        <a href="lobby.html">React</a>
         <ul class="tab-group">
             <li class="tab active"><a href="#signup">Sign Up</a></li>
             <li class="tab"><a href="#login">Log In</a></li>
@@ -22,15 +22,23 @@
 
         <div class="tab-content">
             <div id="signup">
-                <h1>Sign Up</h1>
+                <h1>Sign Up for Free</h1>
                 <form id="new-user-form">
 
-                    
-                    <div class="field-wrap">
-                        <label>
-                            Name<span class="req">*</span>
-                        </label>
-                        <input name="name" type="text" required autocomplete="off" />
+                    <div class="top-row">
+                        <div class="field-wrap">
+                            <label>
+                                First Name<span class="req">*</span>
+                            </label>
+                            <input name="firstName" type="text" required autocomplete="off" />
+                        </div>
+
+                        <div class="field-wrap">
+                            <label>
+                                Last Name<span class="req">*</span>
+                            </label>
+                            <input name="lastName" type="text" required autocomplete="off" />
+                        </div>
                     </div>
 
                     <div class="field-wrap">
@@ -42,9 +50,9 @@
 
                     <div class="field-wrap">
                         <label>
-                            Phone Number<span class="req">*</span>
+                            Set A User-Name<span class="req">*</span>
                         </label>
-                        <input name="phone" required autocomplete="off" />
+                        <input name="userName" required autocomplete="off" />
                     </div>
 
                     <div class="field-wrap">
@@ -60,7 +68,7 @@
                         </label>
                         <input name="passwordConf" type="password" required autocomplete="off" />
                     </div>
-                    <button id="submit-new-user" class="button button-block">Sign Up</button>
+                    <button id="submit-new-user" class="button button-block">Get Started</button>
                 </form>
 
                 
@@ -68,7 +76,7 @@
             </div>
 
             <div id="login">
-                <h1>Log In</h1>
+                <h1>Welcome Back!</h1>
 
                 <form id="user-form">
 
@@ -99,7 +107,7 @@
     </div> <!-- /form -->
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script src="./js/sign_in.js"></script>
+    <script src="/app/src/sign_in.js"></script>
 </body>
 
 </html>
