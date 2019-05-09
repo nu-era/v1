@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,6 +12,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/New-Era/servers/gateway/models/alerts"
 
 	"github.com/New-Era/servers/gateway/handlers"
 	"github.com/New-Era/servers/gateway/models/devices"
@@ -65,24 +68,22 @@ func main() {
 		log.Fatalf("error dialing mongo: %v", err)
 	}
 
-	// TODO: construct a new MongoStore, provide mongoSess as well as a
-	// database and collection name to use (device maybe?)
-
 	// MYSQL DB CONNECTION
 	// Construct MySql serve
-	// dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/mysql",
-	// 	os.Getenv("MYSQL_ROOT_PASSWORD"))
-	// db, err := sql.Open("mysql", dsn)
-	// if err != nil {
-	// 	fmt.Printf("error opening database: %v\n", err)
-	// 	os.Exit(1)
-	// }
-	// defer db.Close()
+	dsn := fmt.Sprintf("root:%s@tcp(mysql:3306)/mysql",
+		os.Getenv("MYSQL_ROOT_PASSWORD"))
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Printf("error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
 
+	alertStore := alerts.NewSqlStore(db)
 	sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
 	deviceStore := devices.NewMongoStore(mongoSess, "db", "devices")
 	ws := handlers.NewSocketStore()
-	hc := handlers.NewHandlerContext(sessionKey, sessStore, deviceStore, ws)
+	hc := handlers.NewHandlerContext(sessionKey, alertStore, sessStore, deviceStore, ws)
 	// // addresses of websocket microservice instances
 	goQ := strings.Split(os.Getenv("GOQ"), ",")
 

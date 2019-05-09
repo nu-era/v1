@@ -10,6 +10,7 @@ docker push bfranzen1/goqueue
 
 export TLSCERT=/etc/letsencrypt/live/api.bfranzen.me/fullchain.pem
 export TLSKEY=/etc/letsencrypt/live/api.bfranzen.me/privkey.pem
+export MYSQL_ROOT_PASSWORD="shakealert"
 export REDISADDR="redisserver:6379"
 export MONGOADDR="mgo:27017"
 export SESSIONKEY="shakealert"

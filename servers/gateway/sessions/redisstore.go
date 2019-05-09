@@ -47,7 +47,7 @@ func (rs *RedisStore) Save(sid SessionID, sessionState interface{}) error {
 func (rs *RedisStore) Get(sid SessionID, sessionState interface{}) error {
 	pipe := rs.Client.Pipeline()
 	j := pipe.Get(sid.getRedisKey())
-	pipe.Expire(sid.getRedisKey(), rs.SessionDuration)
+	//pipe.Expire(sid.getRedisKey(), rs.SessionDuration) // Key should live forever
 	pipe.Exec()
 	jr, err := j.Result()
 	if jr == "" {
