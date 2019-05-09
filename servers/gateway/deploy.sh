@@ -28,14 +28,13 @@ docker network create apinet;
 
 docker pull bfranzen1/goqueue
 docker pull bfranzen1/newera-gateway
-#docker pull newera-mysql
+# docker pull newera-mysql
 docker rm -f gateway
-#docker rm -f mysql
+# docker rm -f mysql
 docker rm -f redisserver
 docker rm -f mgo
 docker rm -f goq
 docker rm -f rmq
-
 
 # Run RabbitMQ instance
 docker run -d \
@@ -58,13 +57,19 @@ docker run -d \
 --name redisserver \
 redis;
 
+
 # Run mysql instance
-#docker run -d \
-#--network apinet \
-#--name mysql \
-#-e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
-#-e MYSQL_DATABASE=mysql \
-#newera/mysql;
+# docker rm -f AlertsDB
+# docker run -d --name AlertsDB --network apinet \
+# -e MYSQL_ROOT_PASSWORD=\$MYSQL_ROOT_PASSWORD -e MYSQL_DATABASE=AlertsDB \
+# alerts;
+
+# docker run -d \
+# --network apinet \
+# --name mysql \
+# -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+# -e MYSQL_DATABASE=mysql \
+# newera/mysql;
 
 sleep 10s; # need to wait for rmq for some reason
 
@@ -78,6 +83,7 @@ docker run -d \
 -e TLSCERT=$TLSCERT \
 -e TLSKEY=$TLSKEY \
 -e REDISADDR=$REDISADDR \
+-e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
 -e MONGO_ADDR=$MONGOADDR \
 -e RABBITMQ=$RABBITMQ \
 -e GOQ=$GOQ \
