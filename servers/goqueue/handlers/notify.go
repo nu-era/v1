@@ -65,6 +65,7 @@ func (ctx *QueueContext) getDevices() {
 
 }
 
+// use 3 km/sec for speed
 func (ctx *QueueContext) Routine() {
 	/*TODO:
 	- listen for data coming in from ShakeAlert API
