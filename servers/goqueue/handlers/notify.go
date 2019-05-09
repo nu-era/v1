@@ -3,12 +3,14 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/akavel/polyclip-go"
-	"github.com/streadway/amqp"
-	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/akavel/polyclip-go"
+	"github.com/streadway/amqp"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // map for shaking intensity based on MMI
@@ -25,12 +27,14 @@ var shaking = map[int]string{
 // Alert is a struct that holds
 // information to send to devices
 type Alert struct {
-	Location  string          `json:"location"`
-	Magnitude string          `json:"magnitude,omitempty"`
-	Intensity string          `json:"intensity,omitempty"`
-	Time      string          `json:"time,omitempty"`
-	Message   string          `json:"message,omitempty"`
-	DeviceIDs []bson.ObjectId `json:"deviceIDs,omitempty"`
+	Location    string          `json:"location"`
+	Magnitude   string          `json:"magnitude,omitempty"`
+	Intensity   string          `json:"intensity,omitempty"`
+	Time        string          `json:"time,omitempty"`
+	Message     string          `json:"message,omitempty"`
+	DeviceIDs   []bson.ObjectId `json:"deviceIDs,omitempty"`
+	SendTime    string          `json:"sendTime,omitempty"`
+	ReceiveTime string          `json:"receiveTime,omitempty"`
 }
 
 // PublishData takes the input data and publishes it to rabbitmq
@@ -55,6 +59,7 @@ func (ctx *QueueContext) PublishData(data interface{}, name string) {
 	if err != nil {
 		fmt.Printf("error publish to queue, %v", err)
 	}
+
 }
 
 // getDevices is a function that filters through devices when an alert is received
@@ -96,12 +101,15 @@ func makeContour(data string) *polyclip.Contour {
 
 // TestHandler simulates a message being pushed onto the RabbitMQ queue
 func (ctx *QueueContext) TestHandler(w http.ResponseWriter, r *http.Request) {
+	currentTime := time.Now()
+
 	data := Alert{
 		Location:  "47.653823, -122.307768",
 		Magnitude: "5.5",
 		Intensity: "4",
 		Time:      "60",
 		Message:   "Light Shaking Expected, head for cover",
+		SendTime:  currentTime.String(),
 	}
 	ctx.PublishData(data, NewEra)
 }

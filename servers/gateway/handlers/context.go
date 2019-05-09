@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/New-Era/servers/gateway/models/alerts"
 	"github.com/New-Era/servers/gateway/models/devices"
 	"github.com/New-Era/servers/gateway/sessions"
 )
@@ -10,6 +11,7 @@ import (
 //Context holds contex values for multiple handler functions
 type HandlerContext struct {
 	SigningKey  string
+	AlertStore  alert.alertStore
 	SessStore   sessions.RedisStore
 	deviceStore devices.MongoStore
 	Sockets     *SocketStore
@@ -17,9 +19,12 @@ type HandlerContext struct {
 
 //NewHandlerContext constructs a new HandlerContext,
 //ensuring that the dependencies are valid values
-func NewHandlerContext(signingKey string, sessStore *sessions.RedisStore, deviceStore *devices.MongoStore, connections *SocketStore) *HandlerContext {
+func NewHandlerContext(signingKey string, alertStore *alerts.MySqlStore, sessStore *sessions.RedisStore, deviceStore *devices.MongoStore, connections *SocketStore) *HandlerContext {
 	if signingKey == "" {
 		panic("empty signing key")
+	}
+	if alertStore == nil {
+		panic("nil alert")
 	}
 	if sessStore == nil {
 		panic("nil session store")
@@ -29,6 +34,7 @@ func NewHandlerContext(signingKey string, sessStore *sessions.RedisStore, device
 	}
 	return &HandlerContext{
 		SigningKey:  signingKey,
+		AlertStore:  *alertStore,
 		SessStore:   *sessStore,
 		deviceStore: *deviceStore,
 		Sockets:     connections,
