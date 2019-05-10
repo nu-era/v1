@@ -5,8 +5,18 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
+
+	"github.com/subosito/gotenv"
 )
+
+func init() {
+	gotenv.Load()
+}
+
+var accountSid = os.Getenv("TWILIO_ACCOUNT_SID")
+var authToken = os.Getenv("TWILIO_AUTH_TOKEN")
 
 /*
 // Send sends a twilio text message to the provided number from the
