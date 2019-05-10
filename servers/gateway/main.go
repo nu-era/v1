@@ -11,7 +11,6 @@ import (
 	"os"
 	"strings"
 	"sync/atomic"
-	"time"
 
 	"github.com/New-Era/servers/gateway/models/alerts"
 
@@ -79,7 +78,7 @@ func main() {
 	}
 	defer db.Close()
 
-	alertStore := alerts.NewSqlStore(db)
+	alertStore := alerts.NewMySqlStore(db)
 	// sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
 	sessStore := sessions.NewRedisStore(rClient)
 	deviceStore := devices.NewMongoStore(mongoSess, "db", "devices")
@@ -106,7 +105,7 @@ func main() {
 	mux.HandleFunc("/device", hc.DevicesHandler)
 	mux.HandleFunc("/ws", hc.WebSocketConnectionHandler)
 	mux.HandleFunc("/setup", hc.DevicesHandler)
-	mux.HandleFunc("/device-info/", hc.SpecificDeviceHandler)
+	mux.HandleFunc("/device-info", hc.SpecificDeviceHandler)
 	mux.HandleFunc("/connect", hc.SessionsHandler)
 	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
 	mux.Handle("/test", goQProxy)
