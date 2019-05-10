@@ -11,7 +11,7 @@ import (
 //Context holds contex values for multiple handler functions
 type HandlerContext struct {
 	SigningKey  string
-	AlertStore  alert.alertStore
+	AlertStore  alerts.MySqlStore
 	SessStore   sessions.RedisStore
 	deviceStore devices.MongoStore
 	Sockets     *SocketStore

@@ -124,11 +124,11 @@ var upgrader = websocket.Upgrader{
 // if the device is valid (request comes from proper host, device exists) upgrade is performed
 // and connection is stored for duration of client session
 func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *http.Request) {
-	// var sess SessionState
-	// if _, err := sessions.GetState(r, hc.SigningKey, hc.SessStore, &sess); err != nil {
-	// 	http.Error(w, "Not authorized to access resource", 401)
-	// 	return
-	// }
+	var sess SessionState
+	if _, err := sessions.GetState(r, hc.SigningKey, hc.SessStore, &sess); err != nil {
+		http.Error(w, "Not authorized to access resource", 401)
+		return
+	}
 
 	// handle the websocket handshake
 	conn, err := upgrader.Upgrade(w, r, nil)
