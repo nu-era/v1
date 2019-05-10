@@ -28,13 +28,15 @@
   .form {
     background: rgba(33, 42, 49, 0.9);
     padding: 40px;
-    padding-top: 10px;
+    padding-top: 5px;
     max-width: 600px;
     margin: 40px auto;
     margin-top: 10px;
     border-radius: 4px;
     box-shadow: 0 4px 20px 5px black;
   }
+  
+
   
   .tab-group {
     list-style: none;
@@ -120,6 +122,8 @@
     border-radius: 0;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
   }
+
+ 
   input:focus, textarea:focus {
     outline: 0;
     border-color: var(--ne_red);
