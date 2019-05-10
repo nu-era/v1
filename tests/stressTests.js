@@ -3,11 +3,17 @@
   window.addEventListener("load", init);
   // let time1;
   // let time2;
+  var tokens = [];
+
   function init() {
-    // createDevice(null, null);
+    for (let i = 0; i < 10; i++) {
+     //   createDevice(null, null, "russia" + i);
+    }
+    testWebsocket();
+    //createDevice(null, null, "test");
     // deviceLogin();
     // deviceInfo();
-    deviceDisconnect();
+   // deviceDisconnect();
   }
 
   function deviceDisconnect() {
@@ -110,15 +116,15 @@
 
   // Sends ajax request to create a device, if login is true
   // it will use credentials to login
-  function createDevice(func, nextCall) {
+  function createDevice(func, nextCall, name) {
     let baseName = "timeDisconnect1";
     let time1 = performance.now();
     // let time2 = performance.now();
     let numDevices = 1;
     for (let i = 0; i < numDevices; i++) {
-      let deviceName = "timeDisconnect5";
+      let deviceName = name;
       let settings = {
-        "async": true,
+        "async": false,
         "crossDomain": true,
         "url": "https://api.bfranzen.me/device",
         "method": "POST",
@@ -142,7 +148,28 @@
           p.innerText = "Creating a device took " + ((time2 - time1)/1000) + " seconds.";
           bd.appendChild(p);
         }
+        tokens.push(bearer);
       });
     }
   }
+
+  function testWebsocket() {
+      let socks = [];
+      for (let i = 0; i < tokens.length; i++) {
+        let sock = new WebSocket("wss://api.bfranzen.me/ws?auth=" + tokens[i])
+        socks.push(sock);
+      }
+      
+      for (var w in socks) {
+        socks[w].onopen = () => {
+            console.log("Connection Opened");
+            socks[w].send("connection open");
+        };
+        socks[w].onmessage = (msg) => {
+            console.log(msg)
+            console.log(socks[w])
+        }
+      }
+  }
+
 })();
