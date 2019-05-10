@@ -7,9 +7,12 @@ import (
 	"strings"
 	"sync"
 
+<<<<<<< HEAD
 	"github.com/New-Era/servers/gateway/models/devices"
 
 	"github.com/New-Era/servers/gateway/sessions"
+=======
+>>>>>>> c686303f240fb44e5214c76dbbc69c4bd0babeb4
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
 	"gopkg.in/mgo.v2/bson"
