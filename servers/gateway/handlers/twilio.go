@@ -101,6 +101,4 @@ func Verify(numberTo string, numberFrom string, msgBody string) {
 	} else {
 		fmt.Println("Error getting twilio response: ", err)
 	}
-
-	return nil
 }
