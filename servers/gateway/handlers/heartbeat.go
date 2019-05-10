@@ -33,13 +33,14 @@ func heartbeat(conn *websocket.Conn) {
 		err := conn.WriteMessage(websocket.TextMessage, []byte("ping"))
 		if err != nil {
 			fmt.Println("Write Error: ", err)
+			//Send("+14254229586", trialNum, dcMsg)
 			break
 		}
 
 		msgType, bytes, err := conn.ReadMessage()
 		if err != nil {
 			fmt.Println("Read Error: ", err)
-			Send("+14254229586", trialNum, dcMsg)
+			//Send("+14254229586", trialNum, dcMsg)
 			break
 		}
 
