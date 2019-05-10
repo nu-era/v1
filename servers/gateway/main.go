@@ -80,7 +80,8 @@ func main() {
 	defer db.Close()
 
 	alertStore := alerts.NewSqlStore(db)
-	sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
+	// sessStore := sessions.NewRedisStore(rClient, time.Duration(600)*time.Second)
+	sessStore := sessions.NewRedisStore(rClient)
 	deviceStore := devices.NewMongoStore(mongoSess, "db", "devices")
 	ws := handlers.NewSocketStore()
 	hc := handlers.NewHandlerContext(sessionKey, alertStore, sessStore, deviceStore, ws)

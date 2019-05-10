@@ -3,7 +3,6 @@ package sessions
 import (
 	"encoding/json"
 	"errors"
-	"time"
 
 	"github.com/patrickmn/go-cache"
 
@@ -19,13 +18,19 @@ type RedisStore struct {
 	//Redis client used to talk to redis server.
 	Client *redis.Client
 	//Used for key expiry time on redis.
-	SessionDuration time.Duration
+	// SessionDuration time.Duration
 }
 
+// //NewRedisStore constructs a new RedisStore
+// func NewRedisStore(client *redis.Client, sessionDuration time.Duration) *RedisStore {
+// 	//initialize and return a new RedisStore struct
+// 	return &RedisStore{Client: client, SessionDuration: sessionDuration}
+// }
+
 //NewRedisStore constructs a new RedisStore
-func NewRedisStore(client *redis.Client, sessionDuration time.Duration) *RedisStore {
+func NewRedisStore(client *redis.Client) *RedisStore {
 	//initialize and return a new RedisStore struct
-	return &RedisStore{Client: client, SessionDuration: sessionDuration}
+	return &RedisStore{Client: client}
 }
 
 //Save saves the provided `sessionState` and associated SessionID to the store.

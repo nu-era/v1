@@ -20,7 +20,7 @@ type HandlerContext struct {
 //NewHandlerContext constructs a new HandlerContext,
 //ensuring that the dependencies are valid values
 func NewHandlerContext(signingKey string, alertStore *alerts.MySqlStore, sessStore *sessions.RedisStore, deviceStore *devices.MongoStore, connections *SocketStore) *HandlerContext {
-	if signingKey == "" {
+	if signingKey == "" { 
 		panic("empty signing key")
 	}
 	if alertStore == nil {
