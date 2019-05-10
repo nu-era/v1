@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/New-Era/servers/gateway/sessions"
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
 	"gopkg.in/mgo.v2/bson"
