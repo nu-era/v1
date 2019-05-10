@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+
 	//"github.com/basgys/goxml2json"
 	"net/http"
 	"strconv"
@@ -102,15 +103,16 @@ func makeContour(data string) *polyclip.Contour {
 
 // TestHandler simulates a message being pushed onto the RabbitMQ queue
 func (ctx *QueueContext) TestHandler(w http.ResponseWriter, r *http.Request) {
-	currentTime := time.Now()
 
+	currentTime := time.Now()
 	data := Alert{
 		Location:  "47.653823, -122.307768",
 		Magnitude: "5.5",
 		Intensity: "4",
 		Time:      "60",
 		Message:   "Light Shaking Expected, head for cover",
-		SendTime:  currentTime.String(),
+
+		SendTime: currentTime.String(),
 	}
 	ctx.PublishData(data, NewEra)
 }

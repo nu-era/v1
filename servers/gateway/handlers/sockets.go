@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/New-Era/servers/gateway/models/devices"
+
 	"github.com/New-Era/servers/gateway/sessions"
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
@@ -153,6 +155,14 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 				if err := json.Unmarshal(p, &j); err != nil {
 					fmt.Printf("error unmarshaling json: %v", err)
 				}
+			}
+
+			if messageType == TextMessage {
+				update := &devices.Updates{
+					Status: "Up",
+				}
+				sess.Device.ApplyUpdates(update)
+				hc.deviceStore.Update(sess.Device.ID, sess.Device)
 			}
 
 			if messageType == CloseMessage {
