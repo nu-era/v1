@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 ./build.sh
+./db/deploy.sh
 docker push bfranzen1/newera-gateway
 #docker push newera/mysql  
 
