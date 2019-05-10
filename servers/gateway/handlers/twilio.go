@@ -53,3 +53,44 @@ func Send(numberTo string, numberFrom string, msgBody string) error {
 
 	return nil
 }
+
+func Verify(numberTo string, numberFrom string, msgBody string) {
+	fmt.Println("Begginning to send twilio verification msg...")
+	msgData := url.Values{}
+	msgData.Set("via", "sms")
+	msgData.Set("phone_number", numberTo)
+	msgData.Set("country_code", "1")
+	msgData.Set("locale", "en")
+	msgDataReader := *strings.NewReader(msgData.Encode())
+
+	// Create HTTP request client
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", twilAuthString, &msgDataReader)
+
+	if err != nil {
+		fmt.Println("Error creating twilio request: ", err)
+	}
+
+	req.SetBasicAuth(accountSid, authToken)
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	// Make HTTP POST request and return message SID
+	resp, err := client.Do(req)
+	if err == nil {
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			var data map[string]interface{}
+			decoder := json.NewDecoder(resp.Body)
+			err := decoder.Decode(&data)
+			if err == nil {
+				fmt.Println(data["sid"])
+			}
+		} else {
+			fmt.Println(resp.Status)
+		}
+	} else {
+		fmt.Println("Error getting twilio response: ", err)
+	}
+
+	return nil
+}

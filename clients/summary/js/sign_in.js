@@ -73,8 +73,8 @@ $('#new-user-form').submit(function(e) {
         TODO: Capture lat + long
     */
 
-    values.latitude = 100.88;
-    values.longitude = 100.88;
+    values.latitude = 47.655548;
+    values.longitude = -122.303200;
     var valJson = JSON.stringify(values);
 
     $.ajax({
