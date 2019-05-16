@@ -1,2 +1,2 @@
 FROM mysql:5.7
-COPY schema.sql /docker-entrypoint-initdb.d/schema.sql
+COPY schema2.sql /docker-entrypoint-initdb.d/schema2.sql
