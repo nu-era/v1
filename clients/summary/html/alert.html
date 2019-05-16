@@ -3,12 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, 
+    <meta name="viewport" content="width=device-width,
 initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>New-Era</title>
-    <link rel="stylesheet" 
-href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
+    <link rel="stylesheet"
+href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
 integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
     <style>
@@ -68,7 +68,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         let sock;
         var map;
         var marker;
-        var bounds;  
+        var bounds;
         const auth = localStorage.getItem('auth');
         submit();
         function initMap(lat, long) {
@@ -76,11 +76,11 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                 lat = parseFloat(-34.397)
                 long = parseFloat(150.644)
             }
-            bounds = new google.maps.LatLngBounds(); 
+            bounds = new google.maps.LatLngBounds();
             map = new google.maps.Map(document.getElementById('map'), {
                 center: {lat: lat, lng: long},
                 zoom: 8
-            
+
             });
 
             marker = new google.maps.Marker({
@@ -119,6 +119,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                 }
                 if (IsJsonString(msg.data)) {
                     let m = JSON.parse(msg.data)
+                    console.log("current time " + timeStamp());
                     console.log(m)
                     let loc = m.location
                     let res = loc.split(",")
@@ -161,12 +162,41 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                             clearInterval(announce);
                         }
                     }, 4000)
-                
+
                 } else {
                     console.log(msg)
                 }
                 sock.send("IM ALIVE")
             };
+        }
+        function timeStamp() {
+          // Create a date object with the current time
+            var now = new Date();
+
+          // Create an array with the current month, day and time
+            var date = [ now.getMonth() + 1, now.getDate(), now.getFullYear() ];
+
+          // Create an array with the current hour, minute and second
+            var time = [ now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds()];
+
+          // Determine AM or PM suffix based on the hour
+            var suffix = ( time[0] < 12 ) ? "AM" : "PM";
+
+          // Convert hour from military time
+            time[0] = ( time[0] < 12 ) ? time[0] : time[0] - 12;
+
+          // If hour is 0, set it to 12
+            time[0] = time[0] || 12;
+
+          // If seconds and minutes are less than 10, add a zero
+            for ( var i = 1; i < 3; i++ ) {
+              if ( time[i] < 10 ) {
+                time[i] = "0" + time[i];
+              }
+            }
+
+          // Return the formatted string
+            return date.join("/") + " " + time.join(":") + " " + suffix;
         }
     </script>
     <script id="mapAPI" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" asynch defer></script>
