@@ -17,6 +17,6 @@ type QueueContext struct {
 	// Database for accessing devices
 	MongoDB *mgo.Session
 
-	// channel for publishing messages
+	// channel for message queue
 	Channel *amqp.Channel
 }

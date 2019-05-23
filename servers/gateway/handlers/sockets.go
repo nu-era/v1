@@ -3,14 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"strings"
-	"sync"
-
 	"github.com/New-Era/servers/gateway/sessions"
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
 	"gopkg.in/mgo.v2/bson"
+	"net/http"
+	"strings"
+	"sync"
 )
 
 // SocketStore contains client connection information

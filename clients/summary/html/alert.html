@@ -69,6 +69,8 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         var map;
         var marker;
         var bounds;
+        var t;
+        var annouce;
         const auth = localStorage.getItem('auth');
         submit();
         function initMap(lat, long) {
@@ -118,6 +120,8 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     return true;
                 }
                 if (IsJsonString(msg.data)) {
+                    clearInterval(t)
+                    clearInterval(announce)
                     let m = JSON.parse(msg.data)
                     console.log("current time " + timeStamp());
                     console.log(m)
@@ -144,7 +148,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     time.innerHTML = time.innerHTML + m.time
                     let tmp = m.time
                     var left;
-                    var t = setInterval(function() {
+                    t = setInterval(function() {
                         left = tmp - 1
                         time.innerHTML = "Estimated <span>" + left + "</span>s until shaking"
                         if (left < 0) {
@@ -154,7 +158,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                         }
                         tmp = left
                     }, 1000)
-                    var announce = setInterval(function() {
+                    announce = setInterval(function() {
 
                         var msg = new SpeechSynthesisUtterance(m.message);
                         window.speechSynthesis.speak(msg);
