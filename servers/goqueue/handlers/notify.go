@@ -82,6 +82,14 @@ func (ctx *QueueContext) Routine() {
 			- filter devices based on location relative to MMI 4 polygon if present
 			- publish message to queue
 	*/
+	events, err := ctx.getEvents(ShakeAlert)
+	if err != nil {
+		fmt.Errorf("Error getting events from message queue: %v", err)
+	}
+	for e := range events {
+		fmt.Println(e)
+	}
+
 }
 
 // makeContour takes in lat/longitude point data from the ShakeAlert API
@@ -115,4 +123,19 @@ func (ctx *QueueContext) TestHandler(w http.ResponseWriter, r *http.Request) {
 		SendTime: currentTime.String(),
 	}
 	ctx.PublishData(data, NewEra)
+}
+
+func (ctx *QueueContext) getEvents(name string) (<-chan amqp.Delivery, error) {
+	chann := ctx.Channel
+
+	queue, err := chann.QueueDeclare(name, true, false, false, false, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error declaring queue, %v", err)
+	}
+
+	events, err := chann.Consume(queue.Name, "", false, false, false, false, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error retreiving messages, %v", err)
+	}
+	return events, nil
 }
