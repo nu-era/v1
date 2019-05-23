@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -99,6 +101,7 @@ func main() {
 	// start go routine to read/send event/message notifications
 	// to sockets
 	go hc.Sockets.Read(events)
+	go checkServer()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
@@ -173,5 +176,31 @@ func CustomDirector(target *url.URL, hc *handlers.HandlerContext) Director {
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
+	}
+}
+
+func checkServer() {
+	conn, err := net.Dial("tcp", "alert1.eew.shakealert.org:61617")
+	if err != nil {
+		fmt.Println("dial error:", err)
+		return
+	}
+	defer conn.Close()
+	fmt.Fprintf(conn, "GET / HTTP/1.0\r\n\r\n")
+
+	buf := make([]byte, 0, 4096) // big buffer
+	tmp := make([]byte, 256)     // using small tmp buffer for demonstrating
+	for {
+		n, err := conn.Read(tmp)
+		if err != nil {
+			if err != io.EOF {
+				fmt.Println("read error:", err)
+			}
+			break
+		}
+		fmt.Println("got", n, "bytes.")
+		buf = append(buf, tmp[:n]...)
+		fmt.Println("total size:", len(buf))
+		fmt.Println(string(buf))
 	}
 }
