@@ -51,7 +51,7 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 		http.Error(w, fmt.Sprintf("error creating new session: %v", err), http.StatusInternalServerError)
 		return
 	}
-	//Verify("+1"+device.Phone, trialNum, "sup")
+	Verify("+1"+device.Phone, trialNum, "sup")
 	respond(w, device, http.StatusCreated)
 }
 

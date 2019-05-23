@@ -16,5 +16,4 @@ const contentTypeHTML = "text/html"
 // TODO: Add to a .gitignorefile
 const trialNum = "+14252121598"
 const twilAuthString = "https://api.authy.com/protected/json/phones/verification/start"
-const twilURLString = "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Messages.json"
 const dcMsg = `You are receiving this message because New-Era has lost contact with your device. If this was not planned, please contact us immediatly.`

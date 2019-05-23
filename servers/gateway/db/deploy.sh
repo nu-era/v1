@@ -1,6 +1,7 @@
 # upload newest container
 docker build -t bfranzen1/alerts .
-docker push bfranzen1/alerts 
+docker tag alerts bfranzen1/alerts
+docker push bfranzen1/alerts
 export MYSQL_ROOT_PASSWORD="shakealert"
 # run container
 
