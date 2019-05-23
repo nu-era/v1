@@ -85,7 +85,8 @@ func Verify(numberTo string, numberFrom string, msgBody string) {
 	if err != nil {
 		fmt.Println("Error creating twilio request: ", err)
 	}
-
+	fmt.Println(accountSid)
+	fmt.Println(authToken)
 	req.SetBasicAuth(accountSid, authToken)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")

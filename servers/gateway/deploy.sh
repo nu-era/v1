@@ -9,6 +9,7 @@ docker push bfranzen1/newera-gateway
 (cd ../goqueue/ ; sh build.sh)
 docker push bfranzen1/goqueue
 
+source ./twilio.env
 export TLSCERT=/etc/letsencrypt/live/api.bfranzen.me/fullchain.pem
 export TLSKEY=/etc/letsencrypt/live/api.bfranzen.me/privkey.pem
 export MYSQL_ROOT_PASSWORD="shakealert"
