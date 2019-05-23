@@ -1,12 +1,10 @@
 from flask import Flask, request, Response
 import json
 from datetime import datetime, timezone
-import config
-import pika
-import sys
-import stomp
-import xmltodict
-import ssl
+import config, pika, sys, stomp, xmltodict, ssl, pymongo, ast
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
+import geopy.distance
 
 flask_app = Flask(__name__)
 flask_app.app_context().push()
@@ -29,7 +27,10 @@ class MyListener(stomp.ConnectionListener):
         print('received a message "%s", headers: %s' % (type(message),headers))
         # have contour message to send out
         if int(headers['subscription']) == 3:
-            process(message)
+            event = process(message)
+            event = makePolygons(event)
+            print(event)
+            mq_chan.basic_publish(exchange='', routing_key=config.qName, body=json.dumps(event))
         
 
 
@@ -53,9 +54,36 @@ def process(message):
         if float(c['MMI']['#text']) >= 4:
             event['MMI_' + c['MMI']['#text']] = c['polygon']['#text']
 
-    mq_chan.basic_publish(exchange='', routing_key=config.qName, body=json.dumps(event))
+    return event
 
         
+# function that takes in a parsed event and returns areas affected by different intensities
+def makePolygons(event):
+    locations = {k: v for k, v in event.items() if k.startswith('MMI_')}
+    polygons = {}
+    for key, value in locations.items():
+        # change event string to polygon points
+        points = value.split(' ')
+        points = ''.join(['(' + l + ')' for l in points])
+        points = points.replace(')(', '), (')
+        
+        # add polygon to list
+        polygon = Polygon(ast.literal_eval(points))
+        polygons[key] = polygon
+
+        # add radius in meters for area affected
+        # gets distance between top point and epicenter
+        event[key + "_radius"] = geopy.distance.distance(polygon.exterior.coords[0], event['location']).m
+
+    # add polygons to event dict
+    event["areas_affected"] = polygons
+
+    # return updated event dict
+    return event
+
+
+# def filterUsers()
+
 
 # connects via stomp to server hosted at host on port using the passed credentials
 def makeConnection(user, pw, host, port):
@@ -83,7 +111,6 @@ try:
     sa_conn.subscribe(destination=config.heartbeat_topic, id=1, ack='auto')
     sa_conn.subscribe(destination=config.gmcontour_topic, id=3, ack='auto')
     test_conn.subscribe(destination=config.contour_test, id=3, ack='auto')
-    print(self)
 except Exception as e:
     "Error subscribing to topic"
     # stop connections
@@ -95,4 +122,5 @@ except Exception as e:
 
 # run app
 if __name__ == "__main__":
-    flask_app.run(debug=False, host=config.host, port=5000)
+    flask_app.run(debug=False, host='msg', port=5000)
+    # host=config.host

@@ -15,7 +15,7 @@ ssh ec2-user@api.bfranzen.me "
     -e RABBITMQ_PORT=5672 \
     -e RABBITMQ_USER='guest' \
     -e RABBITMQ_PW='guest' \
-    -e RMQUEUE='api' \
+    -e RMQUEUE='devices' \
     -e DM_USER='ericjwei@uw.edu' \
     -e DM_PW='NrvnFFjG' \
     -e STOMP_PORT='61612' \

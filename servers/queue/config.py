@@ -1,11 +1,11 @@
 import os
 # environment variables
-host = os.environ["ADDR"]
-mqHOST = os.environ["RABBITMQ_HOST"]
-mqPORT = os.environ["RABBITMQ_PORT"]
-rUSER = os.environ["RABBITMQ_USER"] 
-rPW = os.environ["RABBITMQ_PW"]
-qName = os.environ["RMQUEUE"]
+# host = os.environ["ADDR"]
+# mqHOST = os.environ["RABBITMQ_HOST"]
+# mqPORT = os.environ["RABBITMQ_PORT"]
+# rUSER = os.environ["RABBITMQ_USER"] 
+# rPW = os.environ["RABBITMQ_PW"]
+# qName = os.environ["RMQUEUE"]
 DM_USER = os.environ["DM_USER"]
 DM_PW = os.environ["DM_PW"]
 STOMP_PORT = os.environ["STOMP_PORT"]

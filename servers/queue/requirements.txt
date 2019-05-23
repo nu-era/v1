@@ -8,3 +8,8 @@ Werkzeug==0.14.1
 #mysql-connector-python==8.0.15
 PyMySQL==0.9.3
 pika
+shapely
+pymongo
+stomp
+xmltodict
+geopy
