@@ -85,7 +85,7 @@ func Verify(numberTo string, numberFrom string, msgBody string) {
 	if err != nil {
 		fmt.Println("Error creating twilio request: ", err)
 	}
-
+	fmt.Println(accountSid, authToken)
 	req.SetBasicAuth(accountSid, authToken)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -101,7 +101,7 @@ func Verify(numberTo string, numberFrom string, msgBody string) {
 				fmt.Println(data["sid"])
 			}
 		} else {
-			fmt.Println(resp.Status)
+			fmt.Println(resp.Body)
 		}
 	} else {
 		fmt.Println("Error getting twilio response: ", err)
