@@ -10,8 +10,6 @@ flask_app = Flask(__name__)
 flask_app.app_context().push()
 
 
-
-
 # RabbitMQ declaration
 creds = pika.PlainCredentials(config.rUSER, config.rPW)
 conn = pika.BlockingConnection(pika.ConnectionParameters(host=config.mqHOST, port=config.mqPORT, credentials=creds, heartbeat=0))
@@ -19,6 +17,10 @@ mq_chan = conn.channel()
 mq_chan.queue_declare(queue=config.qName, durable=True)
 
 
+# Connects to mongoDB
+client = MongoClient(config.mgo_host, config.mgo_port)
+db = client.db
+collection = db.devices
 
 
 # what to do on message from ShakeAlert
@@ -30,7 +32,6 @@ class MyListener(stomp.ConnectionListener):
             event = process(message)
             event = makePolygons(event)
             print(event)
-            mq_chan.basic_publish(exchange='', routing_key=config.qName, body=json.dumps(event))
         
 
 
@@ -52,7 +53,7 @@ def process(message):
     # add affected areas by severity 
     for c in contours:
         if float(c['MMI']['#text']) >= 4:
-            event['MMI_' + c['MMI']['#text']] = c['polygon']['#text']
+            event['MMI_' + int(c['MMI']['#text'])] = c['polygon']['#text']
 
     return event
 
@@ -82,7 +83,47 @@ def makePolygons(event):
     return event
 
 
-# def filterUsers()
+
+
+# filters devices by checking if they are within/touching the passed polygon/area affected
+def filterDevices(polygon):
+    devices = []
+    deviceIDs = []
+    # Gets all devices
+    devices = collection.find()
+
+    for device in devices:
+        location = Point(device["Lat"], device["Long"]) # Create point for device
+
+        onPolygon = polygon.touches(location) # Check if device is on edge of polygon
+        inPolygon = polygon.contains(location) # check if device is inside of polygon
+
+        if inPolygon or onPolygon:
+            devices.append(device)
+            deviceIDs.append(device['ID'])
+
+    return devices, deviceIDs
+
+
+
+
+# function that pushes alerts to message queue to notify subset of users
+def pushToUsers(event):
+    # get list of users starting with highest MMI intensity
+    for x in range(10, 3, -1):
+        if 'MMI_' + x in event:
+            u_event = {
+                'magnitude': event['magnitude'],
+                'location': event['location'],
+                'orig_time': event['orig_time'],
+                'orig_time': event['orig_time'],
+                'intensity': event['areas_affected']['MMI_' + x]
+                'MMI_' + x + '_radius': event['MMI_' + x + '_radius']
+            }
+            u_event['devices'], u_event['deviceIDs'] = filterDevices(event['areas_affected']['MMI_' + x])
+            mq_chan.basic_publish(exchange='', routing_key=config.qName, body=json.dumps(u_event))
+
+
 
 
 # connects via stomp to server hosted at host on port using the passed credentials

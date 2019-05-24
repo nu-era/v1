@@ -214,6 +214,6 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 		} else {
 			s.WriteToValidConnections([]bson.ObjectId{}, TextMessage, e.Body)
 		}
-
+		fmt.Println(event)
 	}
 }

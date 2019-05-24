@@ -4,7 +4,7 @@
 
 
 ssh ec2-user@api.bfranzen.me "
-    docker rm -f pyqueue;
+    docker rm -f pyq;
 
     docker pull bfranzen1/queue &&
     docker run -d \
@@ -21,6 +21,8 @@ ssh ec2-user@api.bfranzen.me "
     -e STOMP_PORT='61612' \
     -e AMQ_BROKER='alert5.eew.shakealert.org' \
     -e TEST_BROKER='eew-test1.wr.usgs.gov' \
+    -e MGO_HOST='mgo' \
+    -e MGO_PORT='27017' \
     bfranzen1/queue;
 
     exit

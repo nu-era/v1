@@ -18,7 +18,7 @@ else:
     # Gets all devices
     devices = collection.find()
     for device in devices:
-        location = Point(device["Lat"], device["Lon"]) # Create point for device
+        location = Point(device["Lat"], device["Long"]) # Create point for device
         onPolygon = poly.touches(location) # Check if device is on edge of polygon
         inPolygon = poly.contains(location) # check if device is inside of polygon
         if inPolygon or onPolygon:
