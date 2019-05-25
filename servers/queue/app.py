@@ -1,9 +1,11 @@
 from flask import Flask, request, Response
 import json
 from datetime import datetime, timezone
-import config, pika, sys, stomp, xmltodict, ssl, pymongo, ast
+import config, pika, sys, stomp, xmltodict, ssl, ast
+from pymongo import MongoClient
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
+from bson.json_util import dumps
 import geopy.distance
 
 flask_app = Flask(__name__)
@@ -18,20 +20,18 @@ mq_chan.queue_declare(queue=config.qName, durable=True)
 
 
 # Connects to mongoDB
-client = MongoClient(config.mgo_host, config.mgo_port)
+client = MongoClient(config.mgo_host, int(config.mgo_port))
 db = client.db
 collection = db.devices
-
 
 # what to do on message from ShakeAlert
 class MyListener(stomp.ConnectionListener):
     def on_message(self, headers, message):
-        print('received a message "%s", headers: %s' % (type(message),headers))
         # have contour message to send out
         if int(headers['subscription']) == 3:
             event = process(message)
             event = makePolygons(event)
-            print(event)
+            pushToUsers(event)
         
 
 
@@ -53,7 +53,7 @@ def process(message):
     # add affected areas by severity 
     for c in contours:
         if float(c['MMI']['#text']) >= 4:
-            event['MMI_' + int(c['MMI']['#text'])] = c['polygon']['#text']
+            event['MMI_' + c['MMI']['#text'][0]] = c['polygon']['#text']
 
     return event
 
@@ -98,9 +98,10 @@ def filterDevices(polygon):
         onPolygon = polygon.touches(location) # Check if device is on edge of polygon
         inPolygon = polygon.contains(location) # check if device is inside of polygon
 
-        if inPolygon or onPolygon:
+        if inPolygon or onPolygon or (device["Lat"] == None and device["Long"] == None):
             devices.append(device)
             deviceIDs.append(device['ID'])
+        
 
     return devices, deviceIDs
 
@@ -109,18 +110,19 @@ def filterDevices(polygon):
 
 # function that pushes alerts to message queue to notify subset of users
 def pushToUsers(event):
-    # get list of users starting with highest MMI intensity
+    # get list of users starting with highest MMI intensity (10 -> 4)
     for x in range(10, 3, -1):
-        if 'MMI_' + x in event:
+        if 'MMI_' + str(x) in event:
             u_event = {
                 'magnitude': event['magnitude'],
                 'location': event['location'],
                 'orig_time': event['orig_time'],
                 'orig_time': event['orig_time'],
-                'intensity': event['areas_affected']['MMI_' + x]
-                'MMI_' + x + '_radius': event['MMI_' + x + '_radius']
+                'intensity': x,
+                'MMI_' + str(x) + '_radius': event['MMI_' + str(x) + '_radius']
             }
-            u_event['devices'], u_event['deviceIDs'] = filterDevices(event['areas_affected']['MMI_' + x])
+            devices, u_event['deviceIDs'] = filterDevices(event['areas_affected']['MMI_' + str(x)])
+            u_event['devices'] = dumps(devices)
             mq_chan.basic_publish(exchange='', routing_key=config.qName, body=json.dumps(u_event))
 
 
@@ -153,7 +155,7 @@ try:
     sa_conn.subscribe(destination=config.gmcontour_topic, id=3, ack='auto')
     test_conn.subscribe(destination=config.contour_test, id=3, ack='auto')
 except Exception as e:
-    "Error subscribing to topic"
+    print("Error subscribing to topic", file=sys.stderr)
     # stop connections
     sa_conn.disconnect()
     test_conn.disconnect()
@@ -163,5 +165,4 @@ except Exception as e:
 
 # run app
 if __name__ == "__main__":
-    flask_app.run(debug=False, host='msg', port=5000)
-    # host=config.host
+    flask_app.run(debug=False, host=config.host, port=5000)
