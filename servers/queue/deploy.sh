@@ -7,7 +7,7 @@ ssh ec2-user@api.bfranzen.me "
     docker rm -f pyq;
 
     docker pull bfranzen1/queue &&
-    docker run -d \
+    docker run -d -t \
     --name pyq \
     --network apinet \
     -e ADDR='pyq' \
@@ -23,6 +23,7 @@ ssh ec2-user@api.bfranzen.me "
     -e TEST_BROKER='eew-test1.wr.usgs.gov' \
     -e MGO_HOST='mgo' \
     -e MGO_PORT=27017 \
+    -e PYTHONUNBUFFERED=0 \
     bfranzen1/queue;
 
     exit

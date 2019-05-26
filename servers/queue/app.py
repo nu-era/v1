@@ -9,6 +9,7 @@ from bson.json_util import dumps
 import geopy.distance
 
 flask_app = Flask(__name__)
+print("WOW I WORK HERE CUZ IM DUMB")
 flask_app.app_context().push()
 
 
@@ -23,6 +24,9 @@ mq_chan.queue_declare(queue=config.qName, durable=True)
 client = MongoClient(config.mgo_host, int(config.mgo_port))
 db = client.db
 collection = db.devices
+
+
+
 
 # what to do on message from ShakeAlert
 class MyListener(stomp.ConnectionListener):
@@ -97,8 +101,12 @@ def filterDevices(polygon):
 
         onPolygon = polygon.touches(location) # Check if device is on edge of polygon
         inPolygon = polygon.contains(location) # check if device is inside of polygon
-
-        if inPolygon or onPolygon or (device["Lat"] == None and device["Long"] == None):
+        print("LAT: ", device["Lat"], file=sys.stderr)
+        app.logger.info("LONG: ", device["Long"])
+        print("LOCATION: ", noLoc)
+        noLoc = (device["Lat"] == None and device["Long"] == None) # device didn't provide location, notify anyway
+        sys.stdout.flush()
+        if inPolygon or onPolygon or noLoc:
             devices.append(device)
             deviceIDs.append(device['ID'])
         
@@ -119,7 +127,7 @@ def pushToUsers(event):
                 'orig_time': event['orig_time'],
                 'orig_time': event['orig_time'],
                 'intensity': x,
-                'MMI_' + str(x) + '_radius': event['MMI_' + str(x) + '_radius']
+                'radius': event['MMI_' + str(x) + '_radius']
             }
             devices, u_event['deviceIDs'] = filterDevices(event['areas_affected']['MMI_' + str(x)])
             u_event['devices'] = dumps(devices)
@@ -165,4 +173,6 @@ except Exception as e:
 
 # run app
 if __name__ == "__main__":
+    print("STARTING APP")
+    print(dumps(collection.find()))
     flask_app.run(debug=False, host=config.host, port=5000)
