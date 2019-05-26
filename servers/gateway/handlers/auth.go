@@ -112,6 +112,7 @@ func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.
 			return
 		}
 		respond(w, device, http.StatusOK)
+
 	default:
 		http.Error(w, "method must be GET or PATCH", http.StatusMethodNotAllowed)
 		return
