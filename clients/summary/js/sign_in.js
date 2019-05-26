@@ -86,8 +86,8 @@ $('#new-user-form').submit(function(e) {
             var auth = response.getResponseHeader('Authorization');
             var userData = JSON.stringify(data);
             localStorage.setItem('auth', auth);
-            localStorage.setItem('user', userData);
-            window.location.replace("./html/alert.html");
+            localStorage.setItem('device', userData);
+            window.location.replace("./html/verification.html");
         },
         error: function(jqXhr, textStatus, errorThrown) {
             alert(jqXhr.responseText);
@@ -115,6 +115,7 @@ $('#user-form').submit(function(e) {
             var userData = JSON.stringify(data);
             localStorage.setItem('auth', auth);
             localStorage.setItem('user', userData);
+            switchToVerification();
             window.location.replace("./html/alert.html");
         },
         error: function(jqXhr, textStatus, errorThrown) {
@@ -123,3 +124,6 @@ $('#user-form').submit(function(e) {
     })
 });
 
+function switchToVerification() {
+    
+}
