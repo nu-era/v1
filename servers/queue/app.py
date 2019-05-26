@@ -9,7 +9,6 @@ from bson.json_util import dumps
 import geopy.distance
 
 flask_app = Flask(__name__)
-print("WOW I WORK HERE CUZ IM DUMB")
 flask_app.app_context().push()
 
 
@@ -49,6 +48,7 @@ def process(message):
     
     # build event to push onto message queue
     event = {}
+    event['type'] = d['event_message']['@message_type']
     event['magnitude'] = d['event_message']['core_info']['mag']['#text']
     event['location'] = d['event_message']['core_info']['lat']['#text'] + ', ' + d['event_message']['core_info']['lon']['#text']
     event['orig_time'] = d['event_message']['core_info']['orig_time']['#text']
@@ -91,27 +91,24 @@ def makePolygons(event):
 
 # filters devices by checking if they are within/touching the passed polygon/area affected
 def filterDevices(polygon):
-    devices = []
+    dev_list = []
     deviceIDs = []
     # Gets all devices
     devices = collection.find()
 
     for device in devices:
-        location = Point(device["Lat"], device["Long"]) # Create point for device
+        location = Point(device["lat"], device["long"]) # Create point for device
 
         onPolygon = polygon.touches(location) # Check if device is on edge of polygon
         inPolygon = polygon.contains(location) # check if device is inside of polygon
-        print("LAT: ", device["Lat"], file=sys.stderr)
-        app.logger.info("LONG: ", device["Long"])
-        print("LOCATION: ", noLoc)
-        noLoc = (device["Lat"] == None and device["Long"] == None) # device didn't provide location, notify anyway
-        sys.stdout.flush()
+        noLoc = (device["lat"] == None and device["long"] == None) # device didn't provide location, notify anyway
+
         if inPolygon or onPolygon or noLoc:
-            devices.append(device)
-            deviceIDs.append(device['ID'])
+            dev_list.append(device)
+            deviceIDs.append(str(device['_id']))
         
 
-    return devices, deviceIDs
+    return dev_list, deviceIDs
 
 
 
@@ -122,6 +119,7 @@ def pushToUsers(event):
     for x in range(10, 3, -1):
         if 'MMI_' + str(x) in event:
             u_event = {
+                'type': event['type'],
                 'magnitude': event['magnitude'],
                 'location': event['location'],
                 'orig_time': event['orig_time'],
@@ -148,31 +146,24 @@ def makeConnection(user, pw, host, port):
 
 
 
-# connect to ShakeAlert
-sa_conn = makeConnection(config.DM_USER, config.DM_PW, config.amq_broker, config.STOMP_PORT)
-
-# connect to Test Service to demo/run through test scenarios
-test_conn = makeConnection(config.DM_USER, config.DM_PW, config.test_host, config.STOMP_PORT)
-
-
-
-
-# handle subscriptions
-try:
-    sa_conn.subscribe(destination=config.heartbeat_topic, id=1, ack='auto')
-    sa_conn.subscribe(destination=config.gmcontour_topic, id=3, ack='auto')
-    test_conn.subscribe(destination=config.contour_test, id=3, ack='auto')
-except Exception as e:
-    print("Error subscribing to topic", file=sys.stderr)
-    # stop connections
-    sa_conn.disconnect()
-    test_conn.disconnect()
-
-
-
-
 # run app
 if __name__ == "__main__":
-    print("STARTING APP")
-    print(dumps(collection.find()))
+    # connect to ShakeAlert
+    sa_conn = makeConnection(config.DM_USER, config.DM_PW, config.amq_broker, config.STOMP_PORT)
+
+    # connect to Test Service to demo/run through test scenarios
+    test_conn = makeConnection(config.DM_USER, config.DM_PW, config.test_host, config.STOMP_PORT)
+
+    # handle subscriptions
+    try:
+        sa_conn.subscribe(destination=config.heartbeat_topic, id=1, ack='auto')
+        sa_conn.subscribe(destination=config.gmcontour_topic, id=3, ack='auto')
+        test_conn.subscribe(destination=config.contour_test, id=3, ack='auto')
+    except Exception as e:
+        print("Error subscribing to topic", file=sys.stderr)
+        # stop connections
+        sa_conn.disconnect()
+        test_conn.disconnect()
+
+    # run app    
     flask_app.run(debug=False, host=config.host, port=5000)

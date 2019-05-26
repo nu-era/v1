@@ -54,7 +54,7 @@ func (ms *MongoStore) get(col string, val string) (*Device, error) {
 	if len(col) < 1 {
 		return nil, invalidQuery
 	}
-	coll := ms.ses.DB("store").C("devices")
+	coll := ms.ses.DB(ms.dboname).C("devices")
 	dev := Device{}
 	if col == "_id" {
 		coll.Find(bson.M{col: bson.ObjectId(val)}).One(&dev)
@@ -72,7 +72,7 @@ func (ms *MongoStore) get(col string, val string) (*Device, error) {
 //Insert inserts the device into the database, and returns
 //the newly-inserted Device, complete with the DBMS-assigned ObjectId
 func (ms *MongoStore) Insert(dev *Device) (*Device, error) {
-	coll := ms.ses.DB("store").C("devices")
+	coll := ms.ses.DB(ms.dboname).C("devices")
 	//insert struct into collection
 	if err := coll.Insert(dev); err != nil {
 		return nil, fmt.Errorf("error inserting document: %v\n", err)
@@ -87,7 +87,7 @@ func (ms *MongoStore) Update(id bson.ObjectId, updates *Device) error {
 	if len(id) < 1 {
 		return invalidQuery
 	}
-	coll := ms.ses.DB("store").C("devices")
+	coll := ms.ses.DB(ms.dboname).C("devices")
 	//send an update document with a `$set` property set to the updates map
 	if err := coll.UpdateId(id, bson.M{"$set": updates}); err != nil {
 		return err
@@ -100,7 +100,7 @@ func (ms *MongoStore) Delete(id bson.ObjectId) error {
 	if len(id) < 1 {
 		return invalidQuery
 	}
-	coll := ms.ses.DB("store").C("devices")
+	coll := ms.ses.DB(ms.dboname).C("devices")
 	if err := coll.RemoveId(id); err != nil {
 		return err
 	}

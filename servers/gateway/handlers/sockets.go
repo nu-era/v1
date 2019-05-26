@@ -76,21 +76,22 @@ func (s *SocketStore) RemoveConnection(id bson.ObjectId) {
 // is posted on a public channel
 func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, messageType int, data []byte) error {
 	var writeError error
-	if len(deviceIDs) > 0 { // private channel
+	if len(deviceIDs) > 0 { // send to necessary users
 		for _, id := range deviceIDs {
 			writeError = s.Connections[id].WriteMessage(messageType, data)
 			if writeError != nil {
 				return writeError
 			}
 		}
-	} else { // public channel
-		for _, conn := range s.Connections {
-			writeError = conn.WriteMessage(messageType, data)
-			if writeError != nil {
-				return writeError
-			}
-		}
 	}
+	// } else { // public channel
+	// 	for _, conn := range s.Connections {
+	// 		writeError = conn.WriteMessage(messageType, data)
+	// 		if writeError != nil {
+	// 			return writeError
+	// 		}
+	// 	}
+	// }
 
 	return nil
 }
@@ -208,12 +209,12 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 		if event["deviceIDs"] != nil {
 			ids := make([]bson.ObjectId, len(event["deviceIDs"].([]interface{})))
 			for i, v := range event["deviceIDs"].([]interface{}) {
-				ids[i] = v.(bson.ObjectId)
+				//ids[i] = v.(bson.ObjectId)
+				ids[i] = bson.ObjectIdHex(v.(string))
 			}
 			s.WriteToValidConnections(ids, TextMessage, e.Body)
 		} else {
-			s.WriteToValidConnections([]bson.ObjectId{}, TextMessage, e.Body)
+			//s.WriteToValidConnections([]bson.ObjectId{}, TextMessage, e.Body)
 		}
-		fmt.Println(event)
 	}
 }
