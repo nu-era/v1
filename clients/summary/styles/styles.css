@@ -483,6 +483,11 @@
     cursor: not-allowed;
   }
   
+
+  .pv-title {
+    margin: 5px;
+    padding-top: 10px;
+  }
   
   
   
