@@ -11,6 +11,8 @@ DM_PW = os.environ["DM_PW"]
 STOMP_PORT = os.environ["STOMP_PORT"]
 amq_broker = os.environ["AMQ_BROKER"]
 test_host = os.environ["TEST_BROKER"]
+mgo_host = os.environ["MGO_HOST"]
+mgo_port = os.environ["MGO_PORT"]
 
 
 # topics to subscribe to for ShakeAlert 

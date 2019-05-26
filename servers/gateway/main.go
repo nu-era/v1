@@ -8,10 +8,10 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/http/httputil"
+	//"net/http/httputil"
 	"net/url"
 	"os"
-	"strings"
+	//"strings"
 	"sync/atomic"
 
 	"github.com/New-Era/servers/gateway/models/alerts"
@@ -86,11 +86,12 @@ func main() {
 	deviceStore := devices.NewMongoStore(mongoSess, "db", "devices")
 	ws := handlers.NewSocketStore()
 	hc := handlers.NewHandlerContext(sessionKey, alertStore, sessStore, deviceStore, ws)
-	// // addresses of websocket microservice instances
-	goQ := strings.Split(os.Getenv("GOQ"), ",")
 
-	// // proxy for websocket microservice
-	goQProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(goQ, hc)}
+	// // addresses of logic microservice instances
+	//queue := strings.Split(os.Getenv("GOQ"), ",")
+
+	// // proxy for logic microservice
+	//QProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(queue, hc)}
 
 	// connect to RabbitMQ
 	events, err := hc.Sockets.ConnectQueue(rmq)
@@ -111,7 +112,7 @@ func main() {
 	mux.HandleFunc("/device-info", hc.SpecificDeviceHandler)
 	mux.HandleFunc("/connect", hc.SessionsHandler)
 	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
-	mux.Handle("/test", goQProxy)
+	//mux.Handle("/test", QProxy)
 	wrappedMux := handlers.NewCORS(mux)
 	fmt.Printf("server is listening at https://%s\n", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, wrappedMux))

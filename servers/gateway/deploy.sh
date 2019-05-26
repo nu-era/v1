@@ -17,7 +17,7 @@ export REDISADDR="redisserver:6379"
 export MONGOADDR="mgo:27017"
 export SESSIONKEY="shakealert"
 export RABBITMQ="rmq:5672"
-export GOQ="goq:8000"
+export GOQ="queue:5000"
 #export WCADDRS="wc:8000"
 
 echo "Connecting to server..."
