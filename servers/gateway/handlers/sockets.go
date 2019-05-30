@@ -78,9 +78,11 @@ func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, message
 	var writeError error
 	if len(deviceIDs) > 0 { // send to necessary users
 		for _, id := range deviceIDs {
-			writeError = s.Connections[id].WriteMessage(messageType, data)
-			if writeError != nil {
-				return writeError
+			if _, ok := s.Connections[id]; ok { // if connection exists
+				writeError = s.Connections[id].WriteMessage(messageType, data)
+				if writeError != nil {
+					return writeError
+				}
 			}
 		}
 	}
@@ -140,6 +142,7 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 	// Insert our connection onto our datastructure for ongoing usage
 	hc.Sockets.InsertConnection(sess.Device.ID, conn)
 	// Invoke a goroutine for handling control messages from this connection
+	fmt.Println("CONNECTION INSERTED")
 	heartbeat(conn)
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()

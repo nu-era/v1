@@ -5,10 +5,6 @@ set -e
 docker push bfranzen1/newera-gateway
 #docker push newera/mysql  
 
-# build goqueue microservice container
-(cd ../goqueue/ ; sh build.sh)
-docker push bfranzen1/goqueue
-
 source ./twilio.env
 export TLSCERT=/etc/letsencrypt/live/api.bfranzen.me/fullchain.pem
 export TLSKEY=/etc/letsencrypt/live/api.bfranzen.me/privkey.pem
@@ -17,7 +13,6 @@ export REDISADDR="redisserver:6379"
 export MONGOADDR="mgo:27017"
 export SESSIONKEY="shakealert"
 export RABBITMQ="rmq:5672"
-export GOQ="queue:5000"
 #export WCADDRS="wc:8000"
 
 echo "Connecting to server..."
@@ -28,7 +23,6 @@ printf 'y' | docker system prune -a --volumes;
 # Create docker network
 docker network create apinet;
 
-docker pull bfranzen1/goqueue
 docker pull bfranzen1/newera-gateway
 # docker pull newera-mysql
 docker rm -f gateway
@@ -87,7 +81,6 @@ docker run -d \
 -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
 -e MONGO_ADDR=$MONGOADDR \
 -e RABBITMQ=$RABBITMQ \
--e GOQ=$GOQ \
 -e TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
 -e TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
 bfranzen1/newera-gateway;
