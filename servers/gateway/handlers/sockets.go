@@ -79,9 +79,11 @@ func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, message
 	var writeError error
 	if len(deviceIDs) > 0 { // send to necessary users
 		for _, id := range deviceIDs {
-			writeError = s.Connections[id].WriteMessage(messageType, data)
-			if writeError != nil {
-				return writeError
+			if _, ok := s.Connections[id]; ok { // if connection exists
+				writeError = s.Connections[id].WriteMessage(messageType, data)
+				if writeError != nil {
+					return writeError
+				}
 			}
 		}
 	}

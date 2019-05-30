@@ -21,8 +21,8 @@ var bcryptCost = 13
 type Device struct {
 	ID       bson.ObjectId `bson:"_id"`
 	Name     string        `json:"name"` // ideally want org or business name i.e. Seattle School district
-	Lat      float64       `json:"latitude"`
-	Long     float64       `json:"longitude"`
+	Lat      float64       `json:"latitude,string"`
+	Long     float64       `json:"longitude,string"`
 	PassHash []byte        `json:"-"`
 	Email    string        `json:"-"`
 	Phone    string        `json:"-"`
@@ -42,8 +42,8 @@ type Credentials struct {
 // COMMENT: Do we want to make credentials for new users and send via email?
 type NewDevice struct {
 	Name         string  `json:"name"`
-	Lat          float64 `json:"latitude"`
-	Long         float64 `json:"longitude"`
+	Lat          float64 `json:"latitude,string"`
+	Long         float64 `json:"longitude,string"`
 	Email        string  `json:"email"`
 	Phone        string  `json:"phone"`
 	Password     string  `json:"password"`
@@ -53,8 +53,8 @@ type NewDevice struct {
 //Updates represents allowed updates to a user profile
 type Updates struct {
 	Name         string  `json:"Name"`
-	Lat          float64 `json:"latitude"`
-	Long         float64 `json:"longitude"`
+	Lat          float64 `json:"latitude,string"`
+	Long         float64 `json:"longitude,string"`
 	Email        string  `json:"email"`
 	Phone        string  `json:"phone"`
 	Status       string  `json:"status"`

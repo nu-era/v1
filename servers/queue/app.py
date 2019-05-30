@@ -91,7 +91,6 @@ def makePolygons(event):
 
 # filters devices by checking if they are within/touching the passed polygon/area affected
 def filterDevices(polygon):
-    dev_list = []
     deviceIDs = []
     # Gets all devices
     devices = collection.find()
@@ -104,11 +103,10 @@ def filterDevices(polygon):
         noLoc = (device["lat"] == None and device["long"] == None) # device didn't provide location, notify anyway
 
         if inPolygon or onPolygon or noLoc:
-            dev_list.append(device)
             deviceIDs.append(str(device['_id']))
         
 
-    return dev_list, deviceIDs
+    return deviceIDs
 
 
 
@@ -127,8 +125,7 @@ def pushToUsers(event):
                 'intensity': x,
                 'radius': event['MMI_' + str(x) + '_radius']
             }
-            devices, u_event['deviceIDs'] = filterDevices(event['areas_affected']['MMI_' + str(x)])
-            u_event['devices'] = dumps(devices)
+            u_event['deviceIDs'] = filterDevices(event['areas_affected']['MMI_' + str(x)])
             mq_chan.basic_publish(exchange='', routing_key=config.qName, body=json.dumps(u_event))
 
 
