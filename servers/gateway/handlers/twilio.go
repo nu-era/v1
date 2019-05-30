@@ -19,7 +19,7 @@ func init() {
 var accountSid = os.Getenv("TWILIO_ACCOUNT_SID")
 var authToken = os.Getenv("TWILIO_AUTH_TOKEN")
 var twilURLString = "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Messages.json"
-var twilCheckVerifyURLString = "https://verify.twilio.com/v2/Services/" + accountSid + "/VerificationCheck"
+var twilCheckVerifyURLString = "https://verify.twilio.com/v2/Services/" + serviceSID + "/VerificationCheck"
 
 /*
 // Send sends a twilio text message to the provided number from the
@@ -130,7 +130,7 @@ func Verify(numberTo string, numberFrom string, msgBody string) (string, error) 
 }
 
 func CheckVerification(code string, phoneTo string) error {
-	// Beginning to send twilio verification check message
+	fmt.Println("Begginning to send twilio check verification msg...")
 	msgData := url.Values{}
 	msgData.Set("Code", code)
 	msgData.Set("To", phoneTo)
