@@ -161,12 +161,8 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                         dist = distance(res[0], res[0], lat, long)
                     }
                     // number of seconds using speed of 3km/s
-                    let tmp = distance / 3
+                    let tmp = dist / 3
                     date = new Date(m.orig_time)
-                    console.log(dist)
-                    console.log(tmp)
-                    console.log(date.toLocaleTimeString())
-                    console.log(date)
                     date.setSeconds(date.getSeconds() + tmp)
                     time.innerHTML = "Earthquake estimated to reach you at: <span>" + date.toLocaleTimeString() + "</span>"
                     // var left;

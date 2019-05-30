@@ -15,14 +15,16 @@ TODO:
  window.onload = function() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
-            localStorage.setItem('lat', parseFloat(position.coords.latitude))
-            localStorage.setItem('long', parseFloat(position.coords.longitude))
+            localStorage.setItem('lat', position.coords.latitude.toString())
+            localStorage.setItem('long', position.coords.longitude.toString())
         }, function () {
             console.log("error getting location")
         });
     } else {
-        localStorage.setItem('lat', parseFloat(47.655548))
-        localStorage.setItem('long', parseFloat(-122.303200))
+        var lat = 47.655548
+        var long = -122.303200
+        localStorage.setItem('lat', lat.toString())
+        localStorage.setItem('long', long.toString())
         console.log('no geolocation support')
     }
 };
@@ -86,8 +88,8 @@ $('#new-user-form').submit(function (e) {
     formInputs.each(function () {
         values[this.name] = $(this).val();
     });
-    values.latitude = localStorage.getItem('lat', values.latitude);
-    values.longitude = localStorage.getItem('long', values.latitude);
+    values.latitude = localStorage.getItem('lat');
+    values.longitude = localStorage.getItem('long');
     
     var valJson = JSON.stringify(values);
 
