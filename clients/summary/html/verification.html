@@ -6,14 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>New-ERA</title>
-    <base href="/">
+    <base href="/verification">
     <link rel="stylesheet" href="../styles/styles.css">
 
 </head>
 
 <body>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script src="../js/verification.js"></script>
+
     <div class="form">
         <h1 class="tr-title">New-ERA</h1>
 
@@ -23,10 +22,10 @@
             <form id="phone-verification">
 
                 <div class="field-wrap">
-                    <label>
-                        Verification Code<span class="req">*</span>
+                    <input name="code" type="text" required autocomplete="off" />
+                    <label class="v-label">
+                    Verification Code<span class="req">*</span>
                     </label>
-                    <input name="code" type="number" required autocomplete="off" />
                 </div>
 
                 <button class="button button-block">Verify</button>
@@ -36,6 +35,9 @@
 
     </div> <!-- /form -->
     </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="../js/verification.js"></script>
     
 </body>
 

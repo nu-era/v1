@@ -61,47 +61,95 @@ $('.tab a').on('click', function (e) {
 
 // Logic to send new user or returning user data to server
 
-$('#new-user-form').submit(function(e) {
+$('#new-user-form').submit(function (e) {
     e.preventDefault();
     var formInputs = $('#new-user-form :input');
 
     var values = {};
-    formInputs.each(function() {
+    formInputs.each(function () {
         values[this.name] = $(this).val();
     });
-    /* 
-        TODO: Capture lat + long
-    */
 
-    values.latitude = 47.655548;
-    values.longitude = -122.303200;
-    var valJson = JSON.stringify(values);
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
 
-    $.ajax({
-        type: "POST",
-        url: newUserUrl,
-        contentType: 'application/json',
-        data: valJson,
-        success: function( data, textStatus, response) {
-            var auth = response.getResponseHeader('Authorization');
-            var userData = JSON.stringify(data);
-            localStorage.setItem('auth', auth);
-            localStorage.setItem('device', userData);
-            window.location.replace("./html/verification.html");
-        },
-        error: function(jqXhr, textStatus, errorThrown) {
-            alert(jqXhr.responseText);
-        }
-    })
+            values.latitude = position.coords.latitude;
+            values.longitude = position.coords.longitude;
+            console.log(values);
+            // infoWindow.setPosition(pos);
+            // infoWindow.setContent('Location found.');
+            // infoWindow.open(map);
+            // map.setCenter(pos);
+            var valJson = JSON.stringify(values);
+
+            $.ajax({
+                type: "POST",
+                url: newUserUrl,
+                contentType: 'application/json',
+                data: valJson,
+                success: function (data, textStatus, response) {
+                    var auth = response.getResponseHeader('Authorization');
+                    var userData = JSON.stringify(data);
+                    localStorage.setItem('auth', auth);
+                    localStorage.setItem('device', userData);
+                    window.location.replace("./html/verification.html");
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    alert(jqXhr.responseText);
+                }
+            })
+        }, function () {
+            handleLocationError(true, infoWindow, map.getCenter());
+        });
+    } else {
+        values.latitude = 47.655548;
+        values.longitude = -122.303200;
+        var valJson = JSON.stringify(values);
+  
+        $.ajax({
+            type: "POST",
+            url: newUserUrl,
+            contentType: 'application/json',
+            data: valJson,
+            success: function (data, textStatus, response) {
+                var auth = response.getResponseHeader('Authorization');
+                var userData = JSON.stringify(data);
+                localStorage.setItem('auth', auth);
+                localStorage.setItem('device', userData);
+                window.location.replace("./html/verification.html");
+            },
+            error: function (jqXhr, textStatus, errorThrown) {
+                alert(jqXhr.responseText);
+            }
+        })
+    }
+    // var valJson = JSON.stringify(values);
+
+    // $.ajax({
+    //     type: "POST",
+    //     url: newUserUrl,
+    //     contentType: 'application/json',
+    //     data: valJson,
+    //     success: function (data, textStatus, response) {
+    //         var auth = response.getResponseHeader('Authorization');
+    //         var userData = JSON.stringify(data);
+    //         localStorage.setItem('auth', auth);
+    //         localStorage.setItem('device', userData);
+    //         window.location.replace("./html/verification.html");
+    //     },
+    //     error: function (jqXhr, textStatus, errorThrown) {
+    //         alert(jqXhr.responseText);
+    //     }
+    // })
 
 });
 
-$('#user-form').submit(function(e) {
+$('#user-form').submit(function (e) {
     e.preventDefault();
     var formInputs = $('#user-form :input');
     console.log(formInputs);
     var values = {};
-    formInputs.each(function() {
+    formInputs.each(function () {
         values[this.name] = $(this).val();
     });
     var valJson = JSON.stringify(values);
@@ -110,7 +158,7 @@ $('#user-form').submit(function(e) {
         url: retUserUrl,
         contentType: 'application/json',
         data: valJson,
-        success: function( data, textStatus, response) {
+        success: function (data, textStatus, response) {
             var auth = response.getResponseHeader('Authorization');
             var userData = JSON.stringify(data);
             localStorage.setItem('auth', auth);
@@ -118,12 +166,12 @@ $('#user-form').submit(function(e) {
             switchToVerification();
             window.location.replace("./html/alert.html");
         },
-        error: function(jqXhr, textStatus, errorThrown) {
+        error: function (jqXhr, textStatus, errorThrown) {
             alert(jqXhr.responseText);
         }
     })
 });
 
 function switchToVerification() {
-    
+
 }

@@ -1,12 +1,18 @@
-const data = localStorage.getItem('phone');
-console.log(data);
-$('#phone-verification').submit(function(e) {
-    let numTo = data.phone;
+const phoneNum = localStorage.getItem('phone');
+console.log(phoneNum);
+
+
+$('#phone-verification').click(function(e) {
     var verificationURL = new URL("https://api.bfranzen.me/device-info");
-    console.log(numTo);
-    // e.preventDefault();
-    // var formInputs = $('#phone-verification :input');
-    // console.log(formInputs);
+
+    e.preventDefault();
+    var formInputs = $('#phone-verification :input');
+    var values = {};
+    formInputs.each(function() {
+        values[this.name] = $(this).val();
+    });
+    values.phone = phoneNum;
+    console.log(values)
     // var values = {};
     // formInputs.each(function() {
     //     values[this.name] = $(this).val();
