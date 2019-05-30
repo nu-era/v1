@@ -157,8 +157,9 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     int.innerHTML = int.innerHTML + " " + m.intensity + " <br/> <br/>" + m.message
                     time.innerHTML = time.innerHTML + m.time
                     let dist;
+                    console.log(lat, long)
                     if (lat !== null && long !== null) {
-                        dist = distance(res[0], res[0], lat, long)
+                        dist = distance(res[0], res[0], lat, long, "K")
                     }
                     // number of seconds using speed of 3km/s
                     let tmp = dist / 3
