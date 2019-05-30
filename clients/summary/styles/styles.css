@@ -36,7 +36,9 @@
     box-shadow: 0 4px 20px 5px black;
   }
   
-
+.v-label {
+  margin-bottom: 20px;
+}
   
   .tab-group {
     list-style: none;
