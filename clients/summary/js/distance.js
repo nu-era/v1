@@ -1,3 +1,4 @@
+// gets distance between two points in KM
 function distance(lat1, lon1, lat2, lon2, unit) {
     var radlat1 = Math.PI * parseFloat(lat1)/180
     var radlat2 = Math.PI * parseFloat(lat2)/180

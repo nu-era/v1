@@ -73,6 +73,8 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         // var t;
         // var announce;
         const auth = localStorage.getItem('auth');
+        const lat = localStorage.getItem('lat');
+        const long = localStorage.getItem('long');
         submit();
         // 
         // TODO:
@@ -154,7 +156,12 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     // time.innerHTML = ""
                     int.innerHTML = int.innerHTML + " " + m.intensity + " <br/> <br/>" + m.message
                     time.innerHTML = time.innerHTML + m.time
-                    let tmp = m.time
+                    let distance;
+                    if (lat !== null && long !== null) {
+                        distance = distance(res[0], res[0], lat, long)
+                    }
+                    // number of seconds using speed of 3km/s
+                    let tmp = distance / 3
                     var left;
                     var t = setInterval(function() {
                         left = tmp - 1

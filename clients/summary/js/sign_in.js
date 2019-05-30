@@ -75,6 +75,8 @@ $('#new-user-form').submit(function (e) {
 
             values.latitude = position.coords.latitude;
             values.longitude = position.coords.longitude;
+            localStorage.setItem('lat', values.latitude)
+            localStorage.setItem('long', values.longitude)
             console.log(values);
             // infoWindow.setPosition(pos);
             // infoWindow.setContent('Location found.');
