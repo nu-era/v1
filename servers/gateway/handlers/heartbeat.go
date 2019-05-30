@@ -21,7 +21,7 @@ const (
 	maxMessageSize = 512
 )
 
-func heartbeat(conn *websocket.Conn) {
+func heartbeat(conn *websocket.Conn, phoneTo string) {
 	//fmt.Println("Beggining to send pings")
 	for {
 		conn.SetReadLimit(maxMessageSize)
@@ -33,7 +33,7 @@ func heartbeat(conn *websocket.Conn) {
 		err := conn.WriteMessage(websocket.TextMessage, []byte("ping"))
 		if err != nil {
 			fmt.Println("Write Error: ", err)
-			Send("+14254229586", trialNum, dcMsg)
+			Send(phoneTo, trialNum, dcMsg)
 			break
 		}
 

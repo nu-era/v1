@@ -3,13 +3,14 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+	"sync"
+
 	"github.com/New-Era/servers/gateway/sessions"
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
 	"gopkg.in/mgo.v2/bson"
-	"net/http"
-	"strings"
-	"sync"
 )
 
 // SocketStore contains client connection information
@@ -143,7 +144,7 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 	hc.Sockets.InsertConnection(sess.Device.ID, conn)
 	// Invoke a goroutine for handling control messages from this connection
 	fmt.Println("CONNECTION INSERTED")
-	heartbeat(conn)
+	heartbeat(conn, "+1"+sess.Device.Phone)
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()
 		defer hc.Sockets.RemoveConnection(deviceID)

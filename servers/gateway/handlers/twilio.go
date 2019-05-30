@@ -129,10 +129,11 @@ func Verify(numberTo string, numberFrom string, msgBody string) (string, error) 
 	}
 }
 
-func CheckVerification(code string, verificationSID string) {
+func CheckVerification(code string, phoneTo string) error {
+	// Beginning to send twilio verification check message
 	msgData := url.Values{}
 	msgData.Set("Code", code)
-	msgData.Set("verificationSid", verificationSID)
+	msgData.Set("To", phoneTo)
 	msgData.Set("serviceSid", serviceSID)
 	msgData.Set("country_code", "1")
 	msgData.Set("locale", "en")
@@ -145,6 +146,7 @@ func CheckVerification(code string, verificationSID string) {
 
 	if err != nil {
 		fmt.Println("Error creating twilio request: ", err)
+		return err
 	}
 
 	req.SetBasicAuth(accountSid, authToken)
@@ -153,12 +155,12 @@ func CheckVerification(code string, verificationSID string) {
 
 	// Make HTTP POST request and return message SID
 	resp, err := client.Do(req)
-	// // Save a copy of this request for debugging.
-	// requestDump, err := httputil.DumpRequest(req, true)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// //fmt.Println(string(requestDump))
+	// Save a copy of this request for debugging.
+	requestDump, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(requestDump))
 	if err == nil {
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			var data map[string]interface{}
@@ -174,7 +176,9 @@ func CheckVerification(code string, verificationSID string) {
 			}
 			fmt.Println(string(responseDump))
 		}
+		return nil
 	} else {
 		fmt.Println("Error getting twilio response: ", err)
+		return err
 	}
 }
