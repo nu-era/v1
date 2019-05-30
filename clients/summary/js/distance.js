@@ -1,16 +1,19 @@
 // gets distance between two points in KM
-function distance(lat1, lon1, lat2, lon2, unit) {
-    var radlat1 = Math.PI * parseFloat(lat1)/180
-    var radlat2 = Math.PI * parseFloat(lat2)/180
-    var radlon1 = Math.PI * parseFloat(lon1)/180
-    var radlon2 = Math.PI * parseFloat(lon2)/180
-    var theta = lon1-lon2
-    var radtheta = Math.PI * theta/180
-    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-    dist = Math.acos(dist)
-    dist = dist * 180/Math.PI
-    dist = dist * 60 * 1.1515
-    if (unit=="K") { dist = dist * 1.609344 }
-    if (unit=="N") { dist = dist * 0.8684 }
-    return dist
+function distance(lat1, lng1, lat2, lng2, miles) { // miles optional
+    if (typeof miles === "undefined"){miles=false;}
+    function deg2rad(deg){return deg * (Math.PI/180);}
+    function square(x){return Math.pow(x, 2);}
+    var r=6371; // radius of the earth in km
+    lat1=deg2rad(lat1);
+    lat2=deg2rad(lat2);
+    var lat_dif=lat2-lat1;
+    var lng_dif=deg2rad(lng2-lng1);
+    var a=square(Math.sin(lat_dif/2))+Math.cos(lat1)*Math.cos(lat2)*square(Math.sin(lng_dif/2));
+    var d=2*r*Math.asin(Math.sqrt(a));
+    if (miles){
+        return d * 0.621371;
+        } //return miles
+    else{
+        return d;
+    } //return km
 }
