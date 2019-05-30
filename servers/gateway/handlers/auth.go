@@ -13,8 +13,8 @@ import (
 // DevicesHandler handles the creation (POST) of new devices. Primary key is stored using the name
 // of the device. A standard should be observed.
 func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "method must be Post", http.StatusMethodNotAllowed)
+	if r.Method != "POST" && r.Method != "PATCH" {
+		http.Error(w, "method must be Post or PATCH", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -23,36 +23,56 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	newDevice := &devices.NewDevice{}
-	if err := json.NewDecoder(r.Body).Decode(newDevice); err != nil {
-		http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
-		return
+	if r.Method == "POST" {
+		newDevice := &devices.NewDevice{}
+		if err := json.NewDecoder(r.Body).Decode(newDevice); err != nil {
+			http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		device, err := newDevice.ToDevice()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error creating new device: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		if _, err := ctx.deviceStore.GetByName(device.Name); err == nil {
+			http.Error(w, fmt.Sprintf("device name already exists"), http.StatusBadRequest)
+			return
+		}
+
+		device, err = ctx.deviceStore.Insert(device)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error adding device: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		newSession := &SessionState{StartTime: time.Now(), Device: device}
+		if _, err := sessions.BeginSession(ctx.SigningKey, ctx.SessStore, newSession, w); err != nil {
+			http.Error(w, fmt.Sprintf("error creating new session: %v", err), http.StatusInternalServerError)
+			return
+		}
+		Verify("+1"+device.Phone, trialNum, "sup")
+		respond(w, device, http.StatusCreated)
+	} else {
+		type VerificationCheck struct {
+			Code  string `json:"code"`
+			Phone string `json:"phone"`
+		}
+
+		newVerificationCheck := &VerificationCheck{}
+		if err := json.NewDecoder(r.Body).Decode(newVerificationCheck); err != nil {
+			http.Error(w, fmt.Sprintf("error decoding JSON into VerificationCheck: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		err := CheckVerification(newVerificationCheck.Code, newVerificationCheck.Phone);
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error sending VerificationCheck: %v", err), 500)
+		}
+
 	}
 
-	device, err := newDevice.ToDevice()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("error creating new device: %v", err), http.StatusBadRequest)
-		return
-	}
-
-	if _, err := ctx.deviceStore.GetByName(device.Name); err == nil {
-		http.Error(w, fmt.Sprintf("device name already exists"), http.StatusBadRequest)
-		return
-	}
-
-	device, err = ctx.deviceStore.Insert(device)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("error adding device: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	newSession := &SessionState{StartTime: time.Now(), Device: device}
-	if _, err := sessions.BeginSession(ctx.SigningKey, ctx.SessStore, newSession, w); err != nil {
-		http.Error(w, fmt.Sprintf("error creating new session: %v", err), http.StatusInternalServerError)
-		return
-	}
-	Verify("+1"+device.Phone, trialNum, "sup")
-	respond(w, device, http.StatusCreated)
 }
 
 // SpecificDeviceHandler handles request for a specific device, requiring a prexisting sessions.
