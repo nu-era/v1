@@ -140,7 +140,6 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 	// Insert our connection onto our datastructure for ongoing usage
 	hc.Sockets.InsertConnection(sess.Device.ID, conn)
 	// Invoke a goroutine for handling control messages from this connection
-	fmt.Println("CONNECTION INSERTED")
 	heartbeat(conn)
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()

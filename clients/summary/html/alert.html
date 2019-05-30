@@ -11,6 +11,7 @@ initial-scale=1.0">
 href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
 integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
+    <script src='js/distance.js'></script>
     <style>
         #map {
             height: 500px;
@@ -69,8 +70,8 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         var map;
         var marker;
         var bounds;
-        var t;
-        var announce;
+        // var t;
+        // var announce;
         const auth = localStorage.getItem('auth');
         submit();
         // 
@@ -125,8 +126,8 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     return true;
                 }
                 if (IsJsonString(msg.data)) {
-                    clearInterval(t)
-                    clearInterval(announce)
+                    // clearInterval(t)
+                    // clearInterval(announce)
                     let m = JSON.parse(msg.data)
                     console.log("current time " + timeStamp());
                     console.log(m)
@@ -155,7 +156,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     time.innerHTML = time.innerHTML + m.time
                     let tmp = m.time
                     var left;
-                    t = setInterval(function() {
+                    var t = setInterval(function() {
                         left = tmp - 1
                         time.innerHTML = "Estimated <span>" + left + "</span>s until shaking"
                         if (left < 0) {
@@ -165,7 +166,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                         }
                         tmp = left
                     }, 1000)
-                    announce = setInterval(function() {
+                    var announce = setInterval(function() {
 
                         var msg = new SpeechSynthesisUtterance(m.message);
                         window.speechSynthesis.speak(msg);

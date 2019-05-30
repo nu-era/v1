@@ -35,7 +35,6 @@ docker rm -f gateway
 # docker rm -f mysql
 docker rm -f redisserver
 docker rm -f mgo
-docker rm -f goq
 docker rm -f rmq
 
 # Run RabbitMQ instance
@@ -93,15 +92,6 @@ docker run -d \
 -e TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
 bfranzen1/newera-gateway;
 #-e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
-
-# Run Websocket Microservice instance
-docker run -d \
---network apinet \
---name goq \
--e MONGO_ADDR=$MONGO_ADDR \
--e RABBITMQ=$RABBITMQ \
-bfranzen1/goqueue;
-
 
 exit
 
