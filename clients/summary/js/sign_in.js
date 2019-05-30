@@ -92,7 +92,7 @@ $('#new-user-form').submit(function (e) {
                     var userData = JSON.stringify(data);
                     localStorage.setItem('auth', auth);
                     localStorage.setItem('device', userData);
-                    window.location.replace("./html/verification.html");
+                    window.location.assign("./html/verification.html");
                 },
                 error: function (jqXhr, textStatus, errorThrown) {
                     alert(jqXhr.responseText);
@@ -116,7 +116,7 @@ $('#new-user-form').submit(function (e) {
                 var userData = JSON.stringify(data);
                 localStorage.setItem('auth', auth);
                 localStorage.setItem('device', userData);
-                window.location.replace("./html/verification.html");
+                window.location.assign("./html/verification.html");
             },
             error: function (jqXhr, textStatus, errorThrown) {
                 alert(jqXhr.responseText);
