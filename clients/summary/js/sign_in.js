@@ -21,10 +21,10 @@ TODO:
             console.log("error getting location")
         });
     } else {
-        var lat = 47.655548
-        var long = -122.303200
-        localStorage.setItem('lat', lat.toString())
-        localStorage.setItem('long', long.toString())
+        var lat = "47.655548"
+        var long = "-122.303200"
+        localStorage.setItem('lat', lat)
+        localStorage.setItem('long', long)
         console.log('no geolocation support')
     }
 };
