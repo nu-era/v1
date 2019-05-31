@@ -4,9 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net"
 	"net/http"
 	//"net/http/httputil"
 	"net/url"
@@ -102,7 +100,6 @@ func main() {
 	// start go routine to read/send event/message notifications
 	// to sockets
 	go hc.Sockets.Read(events)
-	go checkServer()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
