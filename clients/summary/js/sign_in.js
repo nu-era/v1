@@ -134,7 +134,7 @@ $('#user-form').submit(function (e) {
             var auth = response.getResponseHeader('Authorization');
             var userData = JSON.stringify(data);
             localStorage.setItem('auth', auth);
-            localStorage.setItem('user', userData);
+            localStorage.setItem('device', userData);
             switchToVerification();
             window.location.replace("./html/alert.html");
         },
