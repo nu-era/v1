@@ -84,13 +84,9 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                         case 'new':
                             console.log("GOT NEW MESSAGE")
                             messages.push(m)
-                            //addCircle(m, circleData, map)
+                            let tmp = addCircle(m, circleData, map)
                             // change zoom to see entire circle
-                            if (m.radius > 100000) {
-                                map.zoom = map.zoom - (m.radius / 100000) - 1
-                            } else {
-                                map.zoom = map.zoom - (m.radius / 10000) - 1
-                            }
+                            map.fitBounds(tmp.getBounds());
                             time.hidden = false;
                             int.hidden = false;
                             int.innerHTML = "Expected Intensity:  " + m.intensity + " (MMI) <br/> <br/>" + circleData[m.intensity].message
@@ -106,15 +102,10 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     console.log(msg)
                 }
                 sock.send("received msg...")
-                // add circles
-                for (var msg in messages) {
-                        addCircle(messages[msg], circleData, map)
-                        messages.splice(msg, 1)
-                    }
             };
         }
     </script>
-    <script id="mapAPI" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" defer></script>
+    <script id="mapAPI" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" async defer></script>
 </body>
 
 </html>
