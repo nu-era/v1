@@ -77,7 +77,7 @@ func (s *SocketStore) RemoveConnection(id bson.ObjectId) {
 // is posted on a public channel
 func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, messageType int, data []byte) error {
 	var writeError error
-	if len(deviceIDs) > 0 { // send to necessary users
+	if len(deviceIDs) > 0 && len(s.Connections) > 0 { // send to necessary users
 		for _, id := range deviceIDs {
 			if _, ok := s.Connections[id]; ok { // if connection exists
 				writeError = s.Connections[id].WriteMessage(messageType, data)
@@ -86,15 +86,14 @@ func (s *SocketStore) WriteToValidConnections(deviceIDs []bson.ObjectId, message
 				}
 			}
 		}
+	} else { // public channel
+		for _, conn := range s.Connections {
+			writeError = conn.WriteMessage(messageType, data)
+			if writeError != nil {
+				return writeError
+			}
+		}
 	}
-	// } else { // public channel
-	// 	for _, conn := range s.Connections {
-	// 		writeError = conn.WriteMessage(messageType, data)
-	// 		if writeError != nil {
-	// 			return writeError
-	// 		}
-	// 	}
-	// }
 
 	return nil
 }

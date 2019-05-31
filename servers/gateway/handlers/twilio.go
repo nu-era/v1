@@ -131,6 +131,7 @@ func Verify(numberTo string, numberFrom string, msgBody string) (string, error) 
 
 func CheckVerification(code string, phoneTo string) error {
 	fmt.Println("Begginning to send twilio check verification msg...")
+	fmt.Println(phoneTo)
 	msgData := url.Values{}
 	msgData.Set("Code", code)
 	msgData.Set("To", phoneTo)
