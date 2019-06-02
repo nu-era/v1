@@ -235,9 +235,9 @@ func (ctx *HandlerContext) Push(ids []bson.ObjectId, data []byte) {
 			fmt.Errorf("error retrieving device, %v", err)
 		}
 		// check that user is subscribed
-		if reflect.ValueOf(dev.Subscription).IsNil() {
+		if !reflect.ValueOf(dev.Subscription).IsNil() {
 			// Send Notification
-			_, err := webpush.SendNotification(data, &dev.Subscription, &webpush.Options{
+			_, err := webpush.SendNotification(data, dev.Subscription, &webpush.Options{
 				Subscriber:      dev.Email,
 				VAPIDPublicKey:  ctx.PubVapid,
 				VAPIDPrivateKey: ctx.PriVapid,

@@ -118,7 +118,6 @@ $('#new-user-form').submit(function (e) {
 $('#user-form').submit(function (e) {
     e.preventDefault();
     var formInputs = $('#user-form :input');
-    console.log(formInputs);
     var values = {};
     formInputs.each(function () {
         values[this.name] = $(this).val();
@@ -139,7 +138,7 @@ $('#user-form').submit(function (e) {
             localStorage.setItem('auth', auth);
             localStorage.setItem('device', userData);
             localStorage.setItem('pubKey', pubKey);
-            switchToVerification();
+            //switchToVerification();
             window.location.replace("./html/alert.html");
         },
         error: function (jqXhr, textStatus, errorThrown) {

@@ -20,15 +20,15 @@ var bcryptCost = 13
 // this stores necessary information for sending/receiving alerts
 // and other useful/identifying information
 type Device struct {
-	ID           bson.ObjectId        `bson:"_id"`
-	Name         string               `json:"name"` // ideally want org or business name i.e. Seattle School district
-	Lat          float64              `json:"latitude,string"`
-	Long         float64              `json:"longitude,string"`
-	PassHash     []byte               `json:"-"`
-	Email        string               `json:"-"`
-	Phone        string               `json:"-"`
-	Status       string               `json:"status"`
-	Subscription webpush.Subscription `json:"-"` // don't pass subscription
+	ID           bson.ObjectId         `bson:"_id"`
+	Name         string                `json:"name"` // ideally want org or business name i.e. Seattle School district
+	Lat          float64               `json:"latitude,string"`
+	Long         float64               `json:"longitude,string"`
+	PassHash     []byte                `json:"-"`
+	Email        string                `json:"-"`
+	Phone        string                `json:"-"`
+	Status       string                `json:"status"`
+	Subscription *webpush.Subscription `json:"-"` // don't pass subscription
 }
 
 //Credentials represents device authorization credentials
