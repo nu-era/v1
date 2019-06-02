@@ -115,7 +115,7 @@ initial-scale=1.0">
                         label: "YOU"
                     });
                     bounds.extend(user.position)
-                    console.log(m)
+                    //console.log(m)
                     // handle different types of messages
                     switch (m.type) {
                         case 'new':
@@ -136,9 +136,9 @@ initial-scale=1.0">
                             d = getTime(lat, long, m, epicntr)
                             time.innerHTML = "Earthquake estimated to reach you at: <span>" + d.toLocaleTimeString() + "</span>"
                     }
-                } else {
-                    console.log(msg)
-                }
+                } //else {
+                //     console.log(msg)
+                // }
                 sock.send("received msg...")
             };
         }

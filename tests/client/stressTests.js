@@ -21,84 +21,38 @@
     // deviceDisconnect("t4");
     // updateDevice("t5");
     document.getElementById("notify-me").addEventListener("click", notifyMe);
-    // document.getElementById("get-location").addEventListener("click", getLocation);
+    document.getElementById("get-location").addEventListener("click", getLocation);
 
   }
 
-  function notifyMe() {
-    const subscription = JSON.stringify(getSubscriptionObject());
-    const sendToServer = (subscription) => {
-      return fetch('http://localhost:8080/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        mode: 'no-cors',
-        body: subscription
-      })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('An error occurred')
-        }
-        return res.json()
-      })
-      .then((resData) => {
-        if (!(resData.data && resData.data.success)) {
-          throw new Error('An error occurred')
-        }
-      })
-    }
+  async function notifyMe() {
+    // Register Service Worker
+    console.log("Registering service worker...");
+    const register = await navigator.serviceWorker.register("/service-worker.js", {
+      scope: "/"
+    }).then(console.error);
+    console.log("Service Worker Registered...");
 
-sendToServer(subscription)
-    if (!('PushManager' in window)) {
-      // The Push API is not supported. Return
-      console.log("push manager not supported");
-    } else {
-      console.log("push manager supported");
-    }
+    // Register Push
+    console.log("Registering Push...");
+    const subscription = await register.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(APP_SERVER_KEY)
+    }).then(console.error);
+    console.log("Push Registered...");
+
+    // Send Push Notification
+    console.log("Sending Push...");
+    await fetch("/subscribe", {
+      method: "POST",
+      body: JSON.stringify(subscription),
+      headers: {
+        "content-type": "application/json"
+      }
+    }).then(console.error);
+    console.log("Push Sent...");
   }
 
-
-  function getSubscriptionObject() {
-    const askPermission = () => {
-      return new Promise((resolve, reject) => {
-        const permissionResult = Notification.requestPermission((result) => {
-          resolve(result)
-        })
-        if (permissionResult) {
-          permissionResult.then(resolve, reject)
-        }
-      })
-      .then((permissionResult) => {
-        if (permissionResult !== 'granted') {
-          throw new Error('Permission denied')
-        }
-      })
-    }
-    if (!('serviceWorker' in navigator)) {
-      // Service Workers are not supported. Return
-      console.log("service worker not supported");
-    } else {
-      console.log("service worker supported");
-      navigator.serviceWorker.register('/service-worker.js')
-      .then((registration) => {
-        console.log('Service Worker registration completed with scope: ',
-          registration.scope)
-        askPermission().then(() => {
-          const options = {
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(APP_SERVER_KEY)
-          }
-          return registration.pushManager.subscribe(options)
-        }).then((pushSubscription) => {
-          // we got the pushSubscription object
-        })
-      }, (err) => {
-        console.log('Service Worker registration failed', err)
-      })
-    }
-
-  }
 
   function urlBase64ToUint8Array(base64String) {
     const padding = "=".repeat((4 - base64String.length % 4) % 4);
@@ -118,16 +72,22 @@ sendToServer(subscription)
 
   function getLocation() {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        let pos = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        console.log(pos);
-      }, function() {
-        handleLocationError(true, infoWindow, map.getCenter());
-      });
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        position(pos);
+      }, function(err) {
+        // permissionDenied(err);
+        // getLocation();
+        console.error(err);
+      }, {timeout:10000});
     }
+  }
+
+  function position(position) {
+    let pos = {
+      lat: position.coords.latitude,
+      lng: position.coords.longitude
+    };
+    console.log(pos);
   }
 
   function deviceDisconnect(name) {
