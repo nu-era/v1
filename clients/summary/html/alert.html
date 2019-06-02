@@ -47,7 +47,7 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         const lat = localStorage.getItem('lat');
         const long = localStorage.getItem('long');
         // over-stringifyed
-        let device = JSON.parse(JSON.parse(localStorage.getItem('device')))
+        let device = JSON.parse(localStorage.getItem('device'))
         submit();
 
         function updateText() {

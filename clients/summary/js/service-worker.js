@@ -1,9 +1,11 @@
-import { circleData } from './circles.js'
-import { getTime, distance } from './alert.js'
+const device;
+
+self.addEventListener('message', function(event){
+    device = JSON.parse(event.data);
+});
 
 self.addEventListener("push", e => {
     const data = e.data.json();
-    const device = JSON.parse(JSON.parse(localStorage.getItem('device')))
     let loc = data.location.split(',')
     // get time equake will hit user
     let d = getTime(device.latitude, device.longitude, data, loc)
