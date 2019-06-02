@@ -7,10 +7,8 @@
 initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>New-Era</title>
-    <link rel="stylesheet"
-href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel='stylesheet' href='../styles/alert.css'>
     <script src='../js/push.js'></script>
     <script src='../js/alert.js'></script>
@@ -18,17 +16,16 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
 </head>
 
 <body>
-        <div class="container">
-            <h1 class="tr-title" id="title">New-ERA</h1>
-        </div>
     <div class="container">
-        <div>
-            <div id="data">
-                <div id="info">
-                    <h1 hidden=true id="int">Expected Intensity: </h4>
-                    <h2 id="waiting">Watching For Earthquakes</h2>
+        <h1 class="tr-title" id="title">New-ERA</h1>
+    </div>
+    <div id="main" class="main container">
+        <div id="data">
+            <div id="info">
+                <h1 id="connectionState">You Are Connected</h1>
+                <p hidden=true id="int">Expected Intensity: </p>
+                    <h2 hidden=true id="waiting">Watching For Earthquakes</h2>
                     <p hidden=true id="time"></p>
-                </div>
             </div>
             <div id="map"></div>
             <!-- <button class="btn btn-info" onclick="demo();">Show Demo</button> -->
@@ -52,26 +49,52 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
 
         function updateText() {
             var title = document.getElementById("title");
+            var main = document.getElementById("main");
             title.innerHTML = "Earthquake Alert!";
-            title.classList.add("glowing");
+            title.classList.add("glowingText");
+            main.classList.add("glowing");
+            main.style.textAlign = "left";
 
             var waiting = document.getElementById("waiting");
             if (waiting) {
                 waiting.parentNode.removeChild(waiting);
             }
 
+            var connection = document.getElementById("connectionState");
+            if (connection) {
+                connection.parentNode.removeChild(connection);
+            }
+
+        }
+
+        function demo() {
+            updateText();
+            time.hidden = false;
+            int.hidden = false;
+            int.innerHTML = "Expected Intensity:  " + 4 + " (MMI) <br/> <br/>" + "<div class='intensity'>Mild Shaking Expected<div/>"
+            
+            time.innerHTML = "Earthquake estimated to reach you at: <span>" + "20 Seconds" + "</span>"
         }
 
         function submit() {
+            var statusMsg = document.getElementById('connectionState')
+            var waiting = document.getElementById('waiting')
+            console.log(statusMsg);
             let token = auth;
             let res = document.getElementById("data");
             sock = new WebSocket("wss://api.bfranzen.me/ws?auth=" + token);
             sock.onopen = () => {
                 console.log("Connection Opened");
+                waiting.hidden = false;
+                statusMsg.innerHTML = "Connected";
+                statusMsg.style.color = "green";
                 sock.send("connection open");
             };
             sock.onclose = () => {
                 console.log("Connection Closed");
+                waiting.hidden = true;
+                statusMsg.innerHTML = "Disconnected"
+                statusMsg.setAttribute("color", "red");
             };
             sock.onmessage = (msg) => {
 
@@ -94,23 +117,23 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
                     bounds.extend(user.position)
                     //console.log(m)
                     // handle different types of messages
-                    switch(m.type) {
+                    switch (m.type) {
                         case 'new':
                             console.log("GOT NEW MESSAGE")
                             messages.push(m)
                             let tmp = addCircle(m, circleData, map)
                             // change zoom to see entire circle
                             map.fitBounds(tmp.getBounds());
-                            
+
                             time.hidden = false;
                             int.hidden = false;
-                            int.innerHTML = "Expected Intensity:  " + m.intensity + " (MMI) <br/> <br/>" + circleData[m.intensity].message
-                            let d = getTime(lat, long, m ,epicntr)
+                            int.innerHTML = "Expected Intensity:  " + m.intensity + " (MMI) <br/> <br/> <div class='intensity'>" + circleData[m.intensity].message + "<div/>"
+                            let d = getTime(lat, long, m, epicntr)
                             time.innerHTML = "Earthquake estimated to reach you at: <span>" + d.toLocaleTimeString() + "</span>"
                         case 'update':
                             // update time and intensity
                             int.innerHTML = "Expected Intensity:  " + m.intensity + " (MMI) <br/> <br/>" + circleData[m.intensity].message
-                            d = getTime(lat, long, m ,epicntr)
+                            d = getTime(lat, long, m, epicntr)
                             time.innerHTML = "Earthquake estimated to reach you at: <span>" + d.toLocaleTimeString() + "</span>"
                     }
                 } //else {
@@ -121,7 +144,9 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         }
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <script id="mapAPI" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" async defer></script>
+    <script id="mapAPI"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvxUkdsobHEfyjJB7N-hzVyblrT4GRBdM&callback=initMap" async
+        defer></script>
 </body>
 
 </html>
