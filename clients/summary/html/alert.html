@@ -56,7 +56,9 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
             title.classList.add("glowing");
 
             var waiting = document.getElementById("waiting");
-            waiting.parentNode.removeChild(waiting);
+            if (waiting) {
+                waiting.parentNode.removeChild(waiting);
+            }
 
         }
 
