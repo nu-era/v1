@@ -18,16 +18,15 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
 </head>
 
 <body>
-    <header class="jumbotron jumbotron-fluid">
         <div class="container">
-            <h1>New-ERA</h1>
+            <h1 class="tr-title" id="title">New-ERA</h1>
         </div>
-    </header>
     <div class="container">
         <div>
             <div id="data">
                 <div id="info">
-                    <h4 hidden=true id="int">Expected Intensity: </h4>
+                    <h1 hidden=true id="int">Expected Intensity: </h4>
+                    <h2 id="waiting">Watching For Earthquakes</h2>
                     <p hidden=true id="time"></p>
                 </div>
             </div>
@@ -51,6 +50,16 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
         let device = JSON.parse(JSON.parse(localStorage.getItem('device')))
         submit();
 
+        function updateText() {
+            var title = document.getElementById("title");
+            title.innerHTML = "Earthquake Alert!";
+            title.classList.add("glowing");
+
+            var waiting = document.getElementById("waiting");
+            waiting.parentNode.removeChild(waiting);
+
+        }
+
         function submit() {
             let token = auth;
             let res = document.getElementById("data");
@@ -65,6 +74,9 @@ integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6J
             sock.onmessage = (msg) => {
 
                 if (IsJsonString(msg.data)) {
+                    // Change title text
+                    updateText();
+
                     // parse message and show epicenter on map
                     let m = JSON.parse(msg.data)
                     let epicntr = m.location.split(',')
