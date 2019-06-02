@@ -9,24 +9,17 @@ if ("serviceWorker" in navigator) {
 // Register SW, Register Push, Send Push
 async function send() {
     // Register Service Worker
-    console.log("Registering service worker...");
-
     const register = await navigator.serviceWorker.register("../js/service-worker.js");
-    console.log("Service Worker Registered...");
 
     // Register Push
-    console.log("Registering Push...");
     const subscription = await register.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
     });
 
-    register.active.postMessage(JSON.stringify({device: localStorage.getItem('device')}))
-
-    console.log("Push Registered...");
+    register.active.postMessage(localStorage.getItem('device'))
 
     // Add user subscription to Back-End
-    console.log("Registering User...");
     await fetch("https://api.bfranzen.me/subscribe", {
         method: "POST",
         body: JSON.stringify(subscription),
@@ -35,7 +28,7 @@ async function send() {
             "Authorization": localStorage.getItem('auth')
         }
     });
-    console.log("User Registered...");
+    console.log("User Registered for Push Notifications...");
 }
 
 function urlBase64ToUint8Array(base64String) {

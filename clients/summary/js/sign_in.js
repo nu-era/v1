@@ -94,7 +94,7 @@ $('#new-user-form').submit(function (e) {
     var valJson = JSON.stringify(values);
 
     $.ajax({
-        type: "POST",
+        method: "POST",
         url: newUserUrl,
         contentType: 'application/json',
         data: valJson,
@@ -127,7 +127,7 @@ $('#user-form').submit(function (e) {
 
     var valJson = JSON.stringify(values);
     $.ajax({
-        type: "POST",
+        method: "POST",
         url: retUserUrl,
         contentType: 'application/json',
         data: valJson,
