@@ -100,10 +100,12 @@ $('#new-user-form').submit(function (e) {
         data: valJson,
         success: function (data, textStatus, response) {
             var auth = response.getResponseHeader('Authorization');
+            var pubKey = response.getResponseHeader('X-VapidKey');
             var userData = JSON.stringify(data);
             localStorage.setItem('phone', values.phone);
             localStorage.setItem('auth', auth);
             localStorage.setItem('device', userData);
+            localStorage.setItem('pubKey', pubKey);
             window.location.replace("./html/verification.html");
         },
         error: function (jqXhr, textStatus, errorThrown) {
@@ -132,9 +134,11 @@ $('#user-form').submit(function (e) {
         data: valJson,
         success: function (data, textStatus, response) {
             var auth = response.getResponseHeader('Authorization');
+            var pubKey = response.getResponseHeader('X-VapidKey');
             var userData = JSON.stringify(data);
             localStorage.setItem('auth', auth);
             localStorage.setItem('device', userData);
+            localStorage.setItem('pubKey', pubKey);
             switchToVerification();
             window.location.replace("./html/alert.html");
         },

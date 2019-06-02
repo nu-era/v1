@@ -8,6 +8,7 @@ import (
 
 	"github.com/New-Era/servers/gateway/models/devices"
 	"github.com/New-Era/servers/gateway/sessions"
+	//webpush "github.com/SherClockHolmes/webpush-go"
 )
 
 // DevicesHandler handles the creation (POST) of new devices. Primary key is stored using the name
@@ -53,6 +54,8 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 		Verify("+1"+device.Phone, trialNum, "sup")
+		// send public key for push notifications as header
+		w.Header().Add("X-VapidKey", ctx.PubVapid)
 		respond(w, device, http.StatusCreated)
 	} else {
 		type VerificationCheck struct {
@@ -66,7 +69,7 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		err := CheckVerification(newVerificationCheck.Code, newVerificationCheck.Phone);
+		err := CheckVerification(newVerificationCheck.Code, newVerificationCheck.Phone)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error sending VerificationCheck: %v", err), 500)
 		}
@@ -93,6 +96,7 @@ func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.
 			http.Error(w, fmt.Sprintf("device not found: %v", err), http.StatusNotFound)
 			return
 		}
+		w.Header().Add("X-VapidKey", ctx.PubVapid)
 		respond(w, device, http.StatusOK)
 	case "PATCH":
 		// segment := path.Base(r.URL.Path)
@@ -199,6 +203,29 @@ func (ctx *HandlerContext) SpecificSessionHandler(w http.ResponseWriter, r *http
 	fmt.Println("signed out")
 	respond(w, nil, http.StatusOK)
 	return
+}
+
+//SubscriptionHandler handles requests for users wanting to receive push notifications
+func (ctx *HandlerContext) SubscriptionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		// requires auth header to get device trying to subscribe
+		sessionState := &SessionState{}
+		_, err := sessions.GetState(r, ctx.SigningKey, ctx.SessStore, sessionState)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("problem with session %v", err), http.StatusUnauthorized)
+			return
+		}
+		dev := sessionState.Device
+		if err := json.NewDecoder(r.Body).Decode(dev.Subscription); err != nil {
+			http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
+			return
+		}
+		// user subsribed successfully
+		respond(w, nil, http.StatusCreated)
+	} else {
+		http.Error(w, "Method Not Allowed", 405)
+	}
+
 }
 
 //respond responds with the status, content type of JSON and encoded value
