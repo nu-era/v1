@@ -28,5 +28,3 @@ var circleData = {
         'color': '#c81e11'
     }   
 }
-
-export { circleData };

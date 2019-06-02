@@ -105,6 +105,3 @@ function addCircle(m, circleData, map) {
     })
     return circle;
 }
-
-
-export {getTime, distance};

@@ -235,7 +235,6 @@ func (ctx *HandlerContext) SubscriptionHandler(w http.ResponseWriter, r *http.Re
 func respond(w http.ResponseWriter, value interface{}, status int, pushKey string) {
 	// send public key for push notifications as header
 	w.Header().Add("X-VapidKey", pushKey)
-	fmt.Println("INCLUDED IN RESPONSE: ", w.Header().Get("X-VapidKey"))
 	if value != nil {
 		w.Header().Add(headerContentType, contentTypeJSON)
 		if err := json.NewEncoder(w).Encode(value); err != nil {
