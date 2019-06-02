@@ -138,12 +138,15 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 		http.Error(w, "Failed to open websocket connection", 401)
 		return
 	}
-
+	//4256148818
 	// Insert our connection onto our datastructure for ongoing usage
 	hc.Sockets.InsertConnection(sess.Device.ID, conn)
 	// Invoke a goroutine for handling control messages from this connection
 	fmt.Println("CONNECTION INSERTED")
-	heartbeat(conn, "+1"+sess.Device.Phone)
+
+	// Get phone number to send twilio messages to
+	dev, _ := hc.deviceStore.GetByID(sess.Device.ID)
+	heartbeat(conn, dev.Email)
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()
 		defer hc.Sockets.RemoveConnection(deviceID)
