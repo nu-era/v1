@@ -8,7 +8,7 @@ import (
 
 	"github.com/New-Era/servers/gateway/models/devices"
 	"github.com/New-Era/servers/gateway/sessions"
-	//webpush "github.com/SherClockHolmes/webpush-go"
+	webpush "github.com/SherClockHolmes/webpush-go"
 )
 
 // DevicesHandler handles the creation (POST) of new devices. Primary key is stored using the name
@@ -54,9 +54,7 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 		Verify("+1"+device.Phone, trialNum, "sup")
-		// send public key for push notifications as header
-		w.Header().Add("X-VapidKey", ctx.PubVapid)
-		respond(w, device, http.StatusCreated)
+		respond(w, device, http.StatusCreated, ctx.PubVapid)
 	} else {
 		type VerificationCheck struct {
 			Code  string `json:"code"`
@@ -96,8 +94,7 @@ func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.
 			http.Error(w, fmt.Sprintf("device not found: %v", err), http.StatusNotFound)
 			return
 		}
-		w.Header().Add("X-VapidKey", ctx.PubVapid)
-		respond(w, device, http.StatusOK)
+		respond(w, device, http.StatusOK, ctx.PubVapid)
 	case "PATCH":
 		// segment := path.Base(r.URL.Path)
 		// if segment != "me" || segment != deviceID.Hex() {
@@ -135,7 +132,7 @@ func (ctx *HandlerContext) SpecificDeviceHandler(w http.ResponseWriter, r *http.
 			http.Error(w, fmt.Sprintf("error updating session state: %v", err), http.StatusInternalServerError)
 			return
 		}
-		respond(w, device, http.StatusOK)
+		respond(w, device, http.StatusOK, ctx.PubVapid)
 
 	default:
 		http.Error(w, "method must be GET or PATCH", http.StatusMethodNotAllowed)
@@ -183,7 +180,7 @@ func (ctx *HandlerContext) SessionsHandler(w http.ResponseWriter, r *http.Reques
 	// 	http.Error(w, fmt.Sprintf("error recording ip of user: %v", err), http.StatusBadRequest)
 	// 	return
 	// }
-	respond(w, device, http.StatusCreated)
+	respond(w, device, http.StatusCreated, ctx.PubVapid)
 }
 
 //SpecificSessionHandler handles requests related to a specific authenticated session
@@ -201,7 +198,7 @@ func (ctx *HandlerContext) SpecificSessionHandler(w http.ResponseWriter, r *http
 		return
 	}
 	fmt.Println("signed out")
-	respond(w, nil, http.StatusOK)
+	respond(w, nil, http.StatusOK, ctx.PubVapid)
 	return
 }
 
@@ -216,12 +213,18 @@ func (ctx *HandlerContext) SubscriptionHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 		dev := sessionState.Device
-		if err := json.NewDecoder(r.Body).Decode(dev.Subscription); err != nil {
+		sub := &webpush.Subscription{}
+		if err := json.NewDecoder(r.Body).Decode(sub); err != nil {
 			http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
 			return
 		}
+		dev.Subscription = sub
+		if err = ctx.deviceStore.Update(dev.ID, dev); err != nil {
+			http.Error(w, fmt.Sprintf("error updating device: %v", err), http.StatusBadRequest)
+			return
+		}
 		// user subsribed successfully
-		respond(w, nil, http.StatusCreated)
+		respond(w, nil, http.StatusCreated, ctx.PubVapid)
 	} else {
 		http.Error(w, "Method Not Allowed", 405)
 	}
@@ -229,8 +232,10 @@ func (ctx *HandlerContext) SubscriptionHandler(w http.ResponseWriter, r *http.Re
 }
 
 //respond responds with the status, content type of JSON and encoded value
-func respond(w http.ResponseWriter, value interface{}, status int) {
-	w.WriteHeader(status)
+func respond(w http.ResponseWriter, value interface{}, status int, pushKey string) {
+	// send public key for push notifications as header
+	w.Header().Add("X-VapidKey", pushKey)
+	fmt.Println("INCLUDED IN RESPONSE: ", w.Header().Get("X-VapidKey"))
 	if value != nil {
 		w.Header().Add(headerContentType, contentTypeJSON)
 		if err := json.NewEncoder(w).Encode(value); err != nil {
@@ -238,4 +243,5 @@ func respond(w http.ResponseWriter, value interface{}, status int) {
 			return
 		}
 	}
+	w.WriteHeader(status)
 }
