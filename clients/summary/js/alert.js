@@ -77,12 +77,13 @@ function getTime(lat, long, m, res) {
 
 
 function addCircle(m, circleData, map) {
-    new google.maps.Circle({
+    var circle = new google.maps.Circle({
         map: map,
         radius: m.radius,
         fillColor: circleData[m.intensity].color,
         center: map.center
     })
+    return circle;
 }
 // function demo() {
         //     const http = new XMLHttpRequest();
