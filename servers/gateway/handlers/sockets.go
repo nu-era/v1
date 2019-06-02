@@ -8,9 +8,11 @@ import (
 	"sync"
 
 	"github.com/New-Era/servers/gateway/sessions"
+	webpush "github.com/SherClockHolmes/webpush-go"
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
 	"gopkg.in/mgo.v2/bson"
+	"reflect"
 )
 
 // SocketStore contains client connection information
@@ -204,7 +206,7 @@ func (s *SocketStore) ConnectQueue(addr string) (<-chan amqp.Delivery, error) {
 
 // Read reads events off the passed go channel created by the ConnectQueue method
 // and sends the messages to the proper websockets in the SocketStore
-func (s *SocketStore) Read(events <-chan amqp.Delivery) {
+func (s *SocketStore) Read(events <-chan amqp.Delivery, ctx *HandlerContext) {
 	for e := range events {
 		var event map[string]interface{}
 		if err := json.Unmarshal(e.Body, &event); err != nil {
@@ -218,8 +220,32 @@ func (s *SocketStore) Read(events <-chan amqp.Delivery) {
 				ids[i] = bson.ObjectIdHex(v.(string))
 			}
 			s.WriteToValidConnections(ids, TextMessage, e.Body)
+			ctx.Push(ids, e.Body)
 		} else {
 			//s.WriteToValidConnections([]bson.ObjectId{}, TextMessage, e.Body)
+		}
+	}
+}
+
+func (ctx *HandlerContext) Push(ids []bson.ObjectId, data []byte) {
+	for _, id := range ids {
+		// get user device
+		dev, err := ctx.deviceStore.GetByID(id)
+		if err != nil {
+			fmt.Errorf("error retrieving device, %v", err)
+		}
+		// check that user is subscribed
+		if reflect.ValueOf(dev.Subscription).IsNil() {
+			// Send Notification
+			_, err := webpush.SendNotification(data, &dev.Subscription, &webpush.Options{
+				Subscriber:      dev.Email,
+				VAPIDPublicKey:  ctx.PubVapid,
+				VAPIDPrivateKey: ctx.PriVapid,
+				TTL:             30,
+			})
+			if err != nil {
+				fmt.Errorf("error sending notification, %v", err)
+			}
 		}
 	}
 }

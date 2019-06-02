@@ -99,7 +99,7 @@ func main() {
 
 	// start go routine to read/send event/message notifications
 	// to sockets
-	go hc.Sockets.Read(events)
+	go hc.Sockets.Read(events, hc)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", handlers.TimeHandler)
@@ -109,6 +109,7 @@ func main() {
 	mux.HandleFunc("/device-info", hc.SpecificDeviceHandler)
 	mux.HandleFunc("/connect", hc.SessionsHandler)
 	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
+	mux.HandleFunc("/subscribe", hc.SubscriptionHandler)
 	//mux.Handle("/test", QProxy)
 	wrappedMux := handlers.NewCORS(mux)
 	fmt.Printf("server is listening at https://%s\n", addr)
