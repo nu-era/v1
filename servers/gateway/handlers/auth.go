@@ -69,7 +69,7 @@ func (ctx *HandlerContext) DevicesHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		err := CheckVerification(newVerificationCheck.Code, newVerificationCheck.Phone)
+		err := CheckVerification(newVerificationCheck.Code, "+1"+newVerificationCheck.Phone)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("error sending VerificationCheck: %v", err), 500)
 		}

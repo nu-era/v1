@@ -29,6 +29,7 @@ var twilCheckVerifyURLString = "https://verify.twilio.com/v2/Services/" + servic
 */
 func Send(numberTo string, numberFrom string, msgBody string) error {
 	fmt.Println("Begginning to send twilio msg...")
+	fmt.Println("Sending to: ", numberTo)
 	msgData := url.Values{}
 	msgData.Set("To", numberTo)
 	msgData.Set("From", numberFrom)
@@ -63,8 +64,7 @@ func Send(numberTo string, numberFrom string, msgBody string) error {
 	} else {
 		fmt.Println("Error getting twilio response: ", err)
 	}
-
-	return nil
+	return nil;
 }
 
 /*
@@ -131,6 +131,7 @@ func Verify(numberTo string, numberFrom string, msgBody string) (string, error) 
 
 func CheckVerification(code string, phoneTo string) error {
 	fmt.Println("Begginning to send twilio check verification msg...")
+	fmt.Println(phoneTo)
 	msgData := url.Values{}
 	msgData.Set("Code", code)
 	msgData.Set("To", phoneTo)
