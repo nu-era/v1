@@ -19,7 +19,10 @@ async function send() {
     const subscription = await register.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-    }).then(() => register.active.postMessage(JSON.stringify({device: localStorage.getItem('device')})));
+    });
+
+    register.active.postMessage(JSON.stringify({device: localStorage.getItem('device')}))
+
     console.log("Push Registered...");
 
     // Add user subscription to Back-End

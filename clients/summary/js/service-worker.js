@@ -1,4 +1,4 @@
-var device = "";
+let device;
 
 // gets distance between two points in KM
 function distance(lat1, lng1, lat2, lng2, miles) { // miles optional
@@ -74,12 +74,12 @@ self.addEventListener("push", e => {
     // get time equake will hit user
     let d = getTime(device.latitude, device.longitude, data, loc)
     let curr = new Date();
-    
+    //((d.getTime() - curr.getTime()) / 1000)
     self.registration.showNotification("EARTHQUAKE ALERT!", {
     body: "Expected Intensity is: " + 
-            data.intensity + " <br/> " + 
-            circleData[data.intensity].message + " <br/> Estimated Time to Impact: " + 
-            ((d.getTime() - curr.getTime()) / 1000) + " seconds",
-    vibrate: [300, 100, 400, 300, 100, 400, 300, 100, 400, 300, 100, 400, 300, 100, 400]
+            data.intensity + " " + 
+            circleData[data.intensity].message + " Estimated Time to Impact: " + 
+            (d) + " seconds",
+    vibrate: [300, 100, 400, 300, 100, 400, 300, 100, 400, 300, 100, 400, 300, 100, 400] // if on mobile
     });
 });
