@@ -1,8 +1,12 @@
 const publicVapidKey =
   localStorage.getItem('pubKey');
 
+if (Notification.permission === "default" || Notification.permission === "denied") {
+    Notification.requestPermission();
+}
+
 // Check for service worker
-if ("serviceWorker" in navigator) {
+if (Notification.permission === "granted" || "serviceWorker" in navigator) {
   send().catch(err => console.error(err));
 }
 

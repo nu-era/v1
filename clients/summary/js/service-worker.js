@@ -78,8 +78,8 @@ self.addEventListener("push", e => {
 
     self.registration.showNotification("EARTHQUAKE ALERT!", {
     body: "Expected Intensity is: " + 
-            data.intensity + " " + 
-            circleData[data.intensity].message + " Estimated Time to Impact: " + 
+            data.intensity + "\n" + 
+            circleData[data.intensity].message + "\nEstimated Time to Impact: " + 
             ((d.getTime() - curr.getTime()) / 1000) + " seconds",
     vibrate: [300, 100, 400, 300, 100, 400, 300, 100, 400, 300, 100, 400, 300, 100, 400] // if on mobile
     });
