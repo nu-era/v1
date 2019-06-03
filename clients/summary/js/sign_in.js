@@ -80,8 +80,6 @@ $('.tab a').on('click', function (e) {
 
 // Logic to send new user or returning user data to server
 
-//console.log($('#new-user-form :input'))
-
 $('#new-user-form').submit(function (e) {
     e.preventDefault();
     var formInputs = $('#new-user-form input');
@@ -124,8 +122,6 @@ $('#user-form').submit(function (e) {
     formInputs.each(function () {
         values[this.name] = $(this).val();
     });
-    // values.latitude = localStorage.getItem('lat');
-    // values.longitude = localStorage.getItem('long');
     var valJson = JSON.stringify(values);
     $.ajax({
         method: "POST",
