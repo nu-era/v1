@@ -80,9 +80,11 @@ $('.tab a').on('click', function (e) {
 
 // Logic to send new user or returning user data to server
 
+//console.log($('#new-user-form :input'))
+
 $('#new-user-form').submit(function (e) {
     e.preventDefault();
-    var formInputs = $('#new-user-form :input');
+    var formInputs = $('#new-user-form input');
 
     var values = {};
     formInputs.each(function () {
@@ -117,7 +119,7 @@ $('#new-user-form').submit(function (e) {
 
 $('#user-form').submit(function (e) {
     e.preventDefault();
-    var formInputs = $('#user-form :input');
+    var formInputs = $('#user-form input');
     var values = {};
     formInputs.each(function () {
         values[this.name] = $(this).val();
