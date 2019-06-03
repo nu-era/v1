@@ -126,7 +126,6 @@ $('#user-form').submit(function (e) {
     });
     // values.latitude = localStorage.getItem('lat');
     // values.longitude = localStorage.getItem('long');
-
     var valJson = JSON.stringify(values);
     $.ajax({
         method: "POST",
