@@ -122,8 +122,8 @@ $('#user-form').submit(function (e) {
     formInputs.each(function () {
         values[this.name] = $(this).val();
     });
-    values.latitude = localStorage.getItem('lat');
-    values.longitude = localStorage.getItem('long');
+    // values.latitude = localStorage.getItem('lat');
+    // values.longitude = localStorage.getItem('long');
 
     var valJson = JSON.stringify(values);
     $.ajax({
