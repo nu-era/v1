@@ -25,9 +25,10 @@ initial-scale=1.0">
                 <p hidden=true id="int">Expected Intensity: </p>
                     <h2 hidden=true id="waiting">Watching For Earthquakes</h2>
                     <p hidden=true id="time"></p>
+                    <p hidden=true id="curr-time"></p>
             </div>
             <div id="map"></div>
-            <!-- <button class="btn btn-info" onclick="demo();">Show Demo</button> -->
+            <button class="btn btn-info" onclick="demo();">Show Demo</button>
         </div>
     </div>
     <script>
@@ -35,6 +36,7 @@ initial-scale=1.0">
         let sock;
         let int = document.getElementById("int")
         let time = document.getElementById("time")
+        let currTime = document.getElementById("curr-time")
         var map;
         var marker;
         var bounds;
@@ -71,7 +73,7 @@ initial-scale=1.0">
             time.hidden = false;
             int.hidden = false;
             int.innerHTML = "Expected Intensity:  " + 4 + " (MMI) <br/> <br/>" + "<div class='intensity'>Mild Shaking Expected<div/>"
-            
+
             time.innerHTML = "Earthquake estimated to reach you at: <span>" + "20 Seconds" + "</span>"
         }
 
@@ -126,20 +128,43 @@ initial-scale=1.0">
 
                             time.hidden = false;
                             int.hidden = false;
+                            currTime.hidden = false;
                             int.innerHTML = "Expected Intensity:  " + m.intensity + " (MMI) <br/> <br/> <div class='intensity'>" + circleData[m.intensity].message + "<div/>"
                             let d = getTime(lat, long, m, epicntr)
                             time.innerHTML = "Earthquake estimated to reach you at: <span>" + d.toLocaleTimeString() + "</span>"
+                            let timer = setInterval(function() {
+                              getCurrentTime();
+                            }, 1000);
                         case 'update':
                             // update time and intensity
                             int.innerHTML = "Expected Intensity:  " + m.intensity + " (MMI) <br/> <br/>" + circleData[m.intensity].message
                             d = getTime(lat, long, m, epicntr)
-                            time.innerHTML = "Earthquake estimated to reach you at: <span>" + d.toLocaleTimeString() + "</span>"
+                            time.innerHTML = "Earthquake estimated to reach you at: <span>" + d.toLocaleTimeString() + "</span>";
+
                     }
                 } //else {
                 //     console.log(msg)
                 // }
                 sock.send("received msg...")
             };
+        }
+
+        function getCurrentTime() {
+          // console.log("in this function")
+          let obj = document.getElementById("curr-time");
+          var today = new Date();
+          var h = today.getHours();
+          var m = today.getMinutes();
+          var s = today.getSeconds();
+          m = checkTime(m);
+          s = checkTime(s);
+          obj.innerHTML = "The current time is: " +
+          h + ":" + m + ":" + s;
+          var t = setTimeout(getCurrentTime, 500);
+        }
+        function checkTime(i) {
+          if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+          return i;
         }
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
