@@ -135,7 +135,6 @@ $('#user-form').submit(function (e) {
             localStorage.setItem('auth', auth);
             localStorage.setItem('device', userData);
             localStorage.setItem('pubKey', pubKey);
-            //switchToVerification();
             window.location.replace("./html/alert.html");
         },
         error: function (jqXhr, textStatus, errorThrown) {
@@ -143,7 +142,3 @@ $('#user-form').submit(function (e) {
         }
     })
 });
-
-function switchToVerification() {
-
-}

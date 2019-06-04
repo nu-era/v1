@@ -152,14 +152,19 @@ func (ctx *HandlerContext) SessionsHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	deviceCredentials := &devices.Credentials{}
+	fmt.Printf("Name PASSED: %v", deviceCredentials.Name)
+	fmt.Printf("PW PASSED: %v", deviceCredentials.Password)
 	if err := json.NewDecoder(r.Body).Decode(deviceCredentials); err != nil {
 		http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
 		return
 	}
 	device, err := ctx.deviceStore.GetByName(deviceCredentials.Name)
-	if device == nil { //Set dummy device
-		device = &devices.Device{}
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error getting device"), http.StatusBadRequest)
 	}
+	// if device == nil { //Set dummy device
+	// 	device = &devices.Device{}
+	// }
 	err = device.Authenticate(deviceCredentials.Password)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("invalid credentials"), http.StatusUnauthorized)
@@ -212,14 +217,19 @@ func (ctx *HandlerContext) SubscriptionHandler(w http.ResponseWriter, r *http.Re
 			http.Error(w, fmt.Sprintf("problem with session %v", err), http.StatusUnauthorized)
 			return
 		}
-		dev := sessionState.Device
+
+		device, err := ctx.deviceStore.GetByID(sessionState.Device.ID)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("device not found: %v", err), http.StatusNotFound)
+			return
+		}
 		sub := &webpush.Subscription{}
 		if err := json.NewDecoder(r.Body).Decode(sub); err != nil {
 			http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
 			return
 		}
-		dev.Subscription = sub
-		if err = ctx.deviceStore.Update(dev.ID, dev); err != nil {
+		device.Subscription = sub
+		if err = ctx.deviceStore.Update(device.ID, device); err != nil {
 			http.Error(w, fmt.Sprintf("error updating device: %v", err), http.StatusBadRequest)
 			return
 		}

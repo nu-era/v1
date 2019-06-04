@@ -148,7 +148,7 @@ func (hc *HandlerContext) WebSocketConnectionHandler(w http.ResponseWriter, r *h
 
 	// Get phone number to send twilio messages to
 	dev, _ := hc.deviceStore.GetByID(sess.Device.ID)
-	heartbeat(conn, dev.Email)
+	heartbeat(conn, dev.Phone)
 	go (func(conn *websocket.Conn, deviceID bson.ObjectId) {
 		defer conn.Close()
 		defer hc.Sockets.RemoveConnection(deviceID)
