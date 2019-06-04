@@ -1,4 +1,4 @@
-let device;
+let location;
 
 // gets distance between two points in KM
 function distance(lat1, lng1, lat2, lng2, miles) { // miles optional
@@ -65,7 +65,7 @@ function getTime(lat, long, m, res) {
 
 // add device reference when user subscribes
 self.addEventListener('message', function(event){
-    device = JSON.parse(event.data);
+    location = JSON.parse(event.data);
 });
 
 // what to do when server sends data
@@ -73,7 +73,7 @@ self.addEventListener("push", e => {
     const data = e.data.json();
     let loc = data.location.split(',')
     // get time equake will hit user
-    let d = getTime(device.latitude, device.longitude, data, loc)
+    let d = getTime(location['lat'], location['long'], data, loc)
     let curr = new Date();
 
     self.registration.showNotification("EARTHQUAKE ALERT!", {

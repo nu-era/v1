@@ -109,7 +109,7 @@ initial-scale=1.0">
                     initMap(parseFloat(epicntr[0]), parseFloat(epicntr[1]), m)
 
                     // add user location to map
-                    userLoc = new google.maps.LatLng(parseFloat(device.latitude), parseFloat(device.longitude))
+                    userLoc = new google.maps.LatLng(parseFloat(lat), parseFloat(long))
                     user = new google.maps.Marker({
                         position: userLoc,
                         map: map,

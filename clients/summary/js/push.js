@@ -21,7 +21,11 @@ async function send() {
     applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
     });
 
-    register.active.postMessage(localStorage.getItem('device'))
+    //register.active.postMessage(localStorage.getItem('device'))
+    register.active.postMessage(JSON.stringify({
+        'lat': localStorage.getItem('lat'),
+        'long': localStorage.getItem('long')
+    }))
 
     // Add user subscription to Back-End
     await fetch("https://api.bfranzen.me/subscribe", {
