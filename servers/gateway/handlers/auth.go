@@ -152,8 +152,6 @@ func (ctx *HandlerContext) SessionsHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	deviceCredentials := &devices.Credentials{}
-	fmt.Printf("Name PASSED: %v", deviceCredentials.Name)
-	fmt.Printf("PW PASSED: %v", deviceCredentials.Password)
 	if err := json.NewDecoder(r.Body).Decode(deviceCredentials); err != nil {
 		http.Error(w, fmt.Sprintf("error decoding JSON: %v", err), http.StatusBadRequest)
 		return

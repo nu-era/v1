@@ -85,12 +85,6 @@ func main() {
 	ws := handlers.NewSocketStore()
 	hc := handlers.NewHandlerContext(sessionKey, alertStore, sessStore, deviceStore, ws)
 
-	// // addresses of logic microservice instances
-	//queue := strings.Split(os.Getenv("GOQ"), ",")
-
-	// // proxy for logic microservice
-	//QProxy := &httputil.ReverseProxy{Director: CustomDirectorRR(queue, hc)}
-
 	// connect to RabbitMQ
 	events, err := hc.Sockets.ConnectQueue(rmq)
 	if err != nil {
@@ -110,7 +104,6 @@ func main() {
 	mux.HandleFunc("/connect", hc.SessionsHandler)
 	mux.HandleFunc("/disconnect", hc.SpecificSessionHandler)
 	mux.HandleFunc("/subscribe", hc.SubscriptionHandler)
-	//mux.Handle("/test", QProxy)
 	wrappedMux := handlers.NewCORS(mux)
 	fmt.Printf("server is listening at https://%s\n", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, wrappedMux))

@@ -135,10 +135,33 @@ $('#user-form').submit(function (e) {
             localStorage.setItem('auth', auth);
             localStorage.setItem('device', userData);
             localStorage.setItem('pubKey', pubKey);
-            window.location.replace("./html/alert.html");
         },
         error: function (jqXhr, textStatus, errorThrown) {
            // alert(jqXhr.responseText);
         }
     })
+    // update user location and switch device to up
+    values = {};
+    values.latitude = localStorage.getItem('lat')
+    values.longitude = localStorage.getItem('long')
+    values.status = "up"
+    valJson = JSON.stringify(values);
+
+    $.ajax({
+        method: "PATCH",
+        url: "https://api.bfranzen.me/device-info",
+        contentType: 'application/json',
+        data: valJson,
+        headers: {
+            'Authorization': localStorage.getItem('auth')
+        },
+        success: function(data, textStatus, response) {
+            window.location.replace("./html/alert.html");
+        },
+        error: function(jqXhr, textStatus, errorThrown) {
+            console.error(jqXhr.responseText)
+        }
+    })
+
+
 });
