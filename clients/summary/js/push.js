@@ -6,8 +6,8 @@ if (Notification.permission === "default" || Notification.permission === "denied
 }
 
 // Check for service worker
-if (Notification.permission === "granted" || "serviceWorker" in navigator) {
-  send().catch(err => console.error(err));
+if (Notification.permission === "granted" && "serviceWorker" in navigator) {
+  send().catch((err) => console.error(err));
 }
 
 // Register SW, Register Push, Send Push
